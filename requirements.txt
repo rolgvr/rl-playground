@@ -1,0 +1,23 @@
+# The project now spans pathfinding (stdlib + Flask) and reinforcement learning
+# (numpy + PyTorch). It is developed against Python 3.14 in a local venv (.venv).
+#
+#   py -3.14 -m venv .venv
+#   .venv\Scripts\python -m pip install -r requirements.txt
+#   # PyTorch with CUDA (GPU training — used for the Pac-Man deep-RL game):
+#   .venv\Scripts\python -m pip install torch --index-url https://download.pytorch.org/whl/cu128
+#   # ...or the CPU build (works, just slower):
+#   .venv\Scripts\python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+flask>=2.0          # web server
+waitress>=3.0       # production WSGI server (the worker is left running for hours)
+numpy>=1.24         # tabular RL agents (Q-learning, SARSA, value/policy iteration)
+torch>=2.2          # deep RL: convolutional DQN family playing Pac-Man (GPU)
+
+# --- Stage 4: distilling an LLM (SFT + DPO on Qwen2.5-1.5B) ---
+transformers>=4.44  # load + fine-tune the small student model
+peft>=0.11          # LoRA adapters
+anthropic>=0.30     # teacher/judge via Claude API (optional)
+openai>=1.40        # teacher/judge via OpenAI API (optional)
+
+# Real-street routing uses only the standard library (urllib) + Leaflet via CDN,
+# so it needs no extra packages — just internet access to OpenStreetMap.

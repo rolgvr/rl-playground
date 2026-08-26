@@ -1,0 +1,25 @@
+# secrets — never commit your API keys
+.env
+*.pem
+*.key
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.venv*/
+venv/
+build/
+dist/
+*.egg-info/
+
+# trained models / runs (large, regenerated)
+# The small demo checkpoints in models/*.pt ARE committed, so a fresh clone can
+# watch a trained agent play without training one first.
+models/llm_tuned/
+models/university/
+models/autoimprove/
+models/llm_data/
+
+# worker pairing token
+.rl_playground/

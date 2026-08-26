@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rl-playground"
+version = "1.0.0"
+description = "Reinforcement Learning Playground — watch search and RL algorithms work, on your own GPU."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "SafeZone AI" }]
+
+# The always-needed core: pathfinding, tabular RL, and the server itself.
+# torch is deliberately NOT here — CPU and CUDA builds come from different
+# indexes, so the user picks (see [project.optional-dependencies] and the README).
+dependencies = [
+    "flask>=2.0",
+    "waitress>=3.0",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+# Stage 3+: deep RL on the GPU.
+gpu = ["torch>=2.2"]
+# Stages 4-6: distilling and evaluating a small LLM.
+llm = ["torch>=2.2", "transformers>=4.44", "peft>=0.11"]
+# Optional hosted teachers. A local model (Ollama/LM Studio/vLLM) needs neither.
+teachers = ["openai>=1.40", "anthropic>=0.30"]
+all = ["rl-playground[gpu,llm,teachers]"]
+
+[project.scripts]
+rl-playground = "rl_learning.server.app:main"
+
+[tool.setuptools.packages.find]
+include = ["rl_learning*"]
+
+[tool.setuptools.package-data]
+"rl_learning.server" = ["static/*"]

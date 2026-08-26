@@ -1,0 +1,1 @@
+{"game": "pacman", "agent": "dqn", "variant": "dqn", "episodes": 2650, "device": "NVIDIA GeForce RTX 4090 Laptop GPU", "best_score": 84.0, "created": "2026-06-05 16:08"}
