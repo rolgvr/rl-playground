@@ -72,8 +72,10 @@ class TestFixEscapes(unittest.TestCase):
 
 class TestMaskSecrets(unittest.TestCase):
     def test_masks_api_keys(self):
-        msg = "Error code 429 for key sk-proj-AbC123_xyz-456 retry later"
-        self.assertNotIn("AbC123", _mask_secrets(msg))
+        # NOT a real key — an obviously-fake fixture so nobody (or a scanner)
+        # mistakes it for a credential. It only has to match the masker's regex.
+        msg = "Error code 429 for key sk-proj-THIS-IS-A-FAKE-EXAMPLE-KEY-000 retry later"
+        self.assertNotIn("FAKE-EXAMPLE", _mask_secrets(msg))
         self.assertIn("sk-***", _mask_secrets(msg))
 
 
