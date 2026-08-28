@@ -81,7 +81,7 @@
       title: "DevOps",
       icon: "server",
       status: "soon",
-      tagline: "Containers, CI/CD and infrastructure as code — ship what you build.",
+      tagline: "Containers, CI/CD, IaC and cloud deployment (AWS · Azure · GCP) — ship what you build.",
     },
   ];
 })();
