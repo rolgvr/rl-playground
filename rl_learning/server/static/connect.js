@@ -123,7 +123,7 @@ function renderWorkerStatus() {
   if (el) {
     if (!RL.paired) {
       el.className = "worker-pill worker-off";
-      el.textContent = RL.base ? "⚠ No GPU worker connected" : "⚠ Worker unavailable";
+      el.textContent = RL.base ? "⚠ No worker connected" : "⚠ Worker unavailable";
     } else if (caps && caps.gpu && caps.gpu.available) {
       el.className = "worker-pill worker-on";
       el.textContent = `🟢 GPU: ${caps.gpu.name} (${caps.gpu.vram_gb} GB)`;

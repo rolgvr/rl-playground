@@ -18,18 +18,19 @@
     <!-- Which machine is doing the work. Hidden entirely when the Python server
          is serving this page, because then the answer is "this one". -->
     <div id="workerBar" hidden>
-      <span id="workerStatus" class="worker-pill worker-off">Checking for a GPU worker…</span>
-      <button id="workerConnectBtn" class="worker-btn">Connect my GPU</button>
+      <span id="workerStatus" class="worker-pill worker-off">Checking for a worker…</span>
+      <button id="workerConnectBtn" class="worker-btn">Connect worker</button>
     </div>
   </div>
 
   <!-- Pairing dialog: how the browser is bound to the user's own machine. -->
   <div id="pairOverlay" hidden>
     <div class="pair-card">
-      <h2>Connect your own GPU</h2>
+      <h2>Connect your worker</h2>
       <p class="pair-lede">
-        Training runs on <strong>your</strong> machine, not our servers. Your GPU, your
-        models and your API keys never leave it — we only serve this page.
+        Everything runs on <strong>your</strong> machine, not our servers — the whole
+        platform computes on your worker. Your GPU, your models and your API keys
+        never leave it; we only serve this page.
       </p>
       <p class="pair-note">
         The worker is <strong>open and free to download</strong> — no account, no access request.
@@ -64,7 +65,8 @@ pip install -e .</code></pre>
       </div>
 
       <p class="pair-foot">
-        No GPU? Pathfinding and tabular RL still work here without one.
+        Grid maze &amp; Real streets need only the worker (no GPU). Deep RL and the
+        LLM stages need a CUDA GPU.
       </p>
     </div>
   </div>
