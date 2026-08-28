@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import os
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, redirect, request, send_from_directory
 
 from ..algorithms import ALGORITHMS
 from ..grid import GridWorld
@@ -151,9 +151,33 @@ def index():
     return send_from_directory(STATIC_DIR, "index.html")
 
 
+# The Learn curriculum is an Astro site (site/ -> site/dist), built by CI for the
+# cloud and by `npm run build` locally. A checkout without a build (no Node, or a
+# wheel install) redirects to the hosted docs, which are the same files.
+DOCS_DIST = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "site", "dist")
+)
+DOCS_URL = "https://rl.safezoneaitech.com"
+
+
 @app.route("/learn")
 def learn():
-    return send_from_directory(STATIC_DIR, "learn.html")
+    if os.path.isfile(os.path.join(DOCS_DIST, "learn.html")):
+        return send_from_directory(DOCS_DIST, "learn.html")
+    return redirect(DOCS_URL + "/learn", code=302)
+
+
+@app.route("/learn/<path:page>")
+def learn_page(page):
+    # Clean URLs, same convention as CloudFront: /learn/x/y -> learn/x/y.html
+    if os.path.isfile(os.path.join(DOCS_DIST, "learn", page + ".html")):
+        return send_from_directory(os.path.join(DOCS_DIST, "learn"), page + ".html")
+    return redirect(f"{DOCS_URL}/learn/{page}", code=302)
+
+
+@app.route("/_astro/<path:asset>")
+def learn_asset(asset):
+    return send_from_directory(os.path.join(DOCS_DIST, "_astro"), asset)
 
 
 @app.route("/play")

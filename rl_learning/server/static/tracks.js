@@ -29,10 +29,10 @@
           lessons: [
             { view: "grid", n: 1, icon: "grid", title: "Grid maze",
               blurb: "Pathfinding on a maze you draw — BFS, Dijkstra, A*.",
-              needsGpu: false, learn: "/learn#pathfinding" },
+              needsGpu: false, learn: "/learn/rl/pathfinding" },
             { view: "map", n: 2, icon: "route", title: "Real streets",
               blurb: "The very same searches, racing over live OpenStreetMap roads.",
-              needsGpu: false, learn: "/learn#pathfinding" },
+              needsGpu: false, learn: "/learn/rl/pathfinding" },
           ],
         },
         {
@@ -40,7 +40,7 @@
           lessons: [
             { view: "game", n: 3, icon: "gamepad", title: "Deep RL",
               blurb: "An agent learns Pac-Man & Pong from raw pixels — DQN to PPO.",
-              needsGpu: true, learn: "/learn#deep-rl" },
+              needsGpu: true, learn: "/learn/rl/deep-rl" },
           ],
         },
         {
@@ -48,13 +48,13 @@
           lessons: [
             { view: "llm", n: 4, icon: "chip", title: "Teach an LLM",
               blurb: "Distil a big teacher into a small model (SFT → DPO / RLAIF).",
-              needsGpu: true, learn: "/learn#teach-llm" },
+              needsGpu: true, learn: "/learn/rl/teach-llm" },
             { view: "reason", n: 5, icon: "loop", title: "Reasoning Lab",
               blurb: "Wire agents into generate → critique → refine loops.",
-              needsGpu: true, learn: "/learn#reasoning" },
+              needsGpu: true, learn: "/learn/rl/reasoning" },
             { view: "auto", n: 6, icon: "cap", title: "University",
               blurb: "A Dean designs a curriculum and teaches a model to mastery.",
-              needsGpu: true, learn: "/learn#university" },
+              needsGpu: true, learn: "/learn/rl/university" },
           ],
         },
       ],

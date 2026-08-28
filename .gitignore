@@ -23,3 +23,7 @@ models/llm_data/
 
 # worker pairing token
 .rl_playground/
+
+# learn-site (site/) build artifacts
+node_modules/
+.astro/
