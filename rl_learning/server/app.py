@@ -151,6 +151,16 @@ def index():
     return send_from_directory(STATIC_DIR, "index.html")
 
 
+@app.route("/learn")
+def learn():
+    return send_from_directory(STATIC_DIR, "learn.html")
+
+
+@app.route("/play")
+def play():
+    return send_from_directory(STATIC_DIR, "play.html")
+
+
 @app.route("/api/algorithms")
 def list_algorithms():
     """Tell the UI which algorithms exist and how to describe them."""

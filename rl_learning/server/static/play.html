@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RL Learning · Pathfinding Race</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drawflow@0.0.59/dist/drawflow.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-mark">◆</span>
+      <span class="brand-name">RL Playground</span>
+    </a>
+    <nav class="topnav">
+      <a href="/">Home</a>
+      <a href="/learn">Learn</a>
+      <a href="/play" class="active">Playground</a>
+    </nav>
+    <!-- Which machine is doing the work. Hidden entirely when the Python server
+         is serving this page, because then the answer is "this one". -->
+    <div id="workerBar" hidden>
+      <span id="workerStatus" class="worker-pill worker-off">Checking for a worker…</span>
+      <button id="workerConnectBtn" class="worker-btn">Connect worker</button>
+    </div>
+  </div>
+
+  <!-- Pairing dialog: how the browser is bound to the user's own machine. -->
+  <div id="pairOverlay" hidden>
+    <div class="pair-card">
+      <h2>Connect your worker</h2>
+      <p class="pair-lede">
+        Everything runs on <strong>your</strong> machine, not our servers — the whole
+        platform computes on your worker. Your GPU, your models and your API keys
+        never leave it; we only serve this page.
+      </p>
+      <p class="pair-note">
+        The worker is <strong>open and free to download</strong> — no account, no access request.
+      </p>
+
+      <ol class="pair-steps">
+        <li>
+          <strong>Get the worker.</strong> Clone the public repo and install:
+          <pre><code>git clone github.com/rolgvr/rl-playground.git
+cd rl-playground
+pip install -e .</code></pre>
+        </li>
+        <li>
+          <strong>Start it</strong>, pointed at this site
+          <pre><code>rl-playground --mode worker --allow-origin https://rl.safezoneaitech.com</code></pre>
+        </li>
+        <li>
+          <strong>Paste the pairing token</strong> it prints
+          <input id="pairToken" type="password" placeholder="pairing token" autocomplete="off" spellcheck="false" />
+          <details>
+            <summary>My worker is on a different port</summary>
+            <input id="pairUrl" type="text" placeholder="http://127.0.0.1:5057" autocomplete="off" spellcheck="false" />
+          </details>
+        </li>
+      </ol>
+
+      <p id="pairError" class="pair-error" hidden></p>
+
+      <div class="pair-actions">
+        <button id="pairCancel" class="worker-btn">Cancel</button>
+        <button id="pairSubmit" class="worker-btn worker-btn-primary">Connect</button>
+      </div>
+
+      <p class="pair-foot">
+        Grid maze &amp; Real streets need only the worker (no GPU). Deep RL and the
+        LLM stages need a CUDA GPU.
+      </p>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <!-- The learning ladder — filled by shell.js. This is the primary nav:
+         a guided path you can also free-jump. -->
+    <nav class="ladder" id="ladder" aria-label="Learning ladder"></nav>
+
+    <div class="app-content">
+      <!-- Consistent per-rung header (number · title · what/why · GPU chip),
+           rendered by shell.js on every rung change. -->
+      <div id="rungHeader" class="rung-header"></div>
+
+  <main>
+    <!-- ============ Left: the shared editable world ============ -->
+    <section class="editor-panel">
+      <div class="view-toggle" id="viewToggle">
+        <button data-view="grid" class="active">▦ Grid maze</button>
+        <button data-view="map">🗺 Real streets</button>
+        <!-- These four need real VRAM. connect.js greys them out until a worker
+             with a CUDA GPU is attached. -->
+        <button data-view="game" data-needs-gpu>🎮 Play (Deep RL)</button>
+        <button data-view="llm" data-needs-gpu>🧠 Teach LLM</button>
+        <button data-view="reason" data-needs-gpu>🔁 Reasoning Lab</button>
+        <button data-view="auto" data-needs-gpu>🎓 University</button>
+      </div>
+
+      <!-- ---- Grid view ---- -->
+      <div id="gridView">
+        <h2>The world <span class="hint">(this same grid is sent to every algorithm)</span></h2>
+
+        <div class="toolbar">
+          <div class="tool-group" id="modeButtons">
+            <button class="tool active" data-mode="wall">🧱 Wall</button>
+            <button class="tool" data-mode="weight">🟫 Mud (cost 5)</button>
+            <button class="tool" data-mode="start">🟢 Start</button>
+            <button class="tool" data-mode="goal">🔴 Goal</button>
+            <button class="tool" data-mode="erase">🧽 Erase</button>
+          </div>
+        </div>
+
+        <div class="canvas-wrap">
+          <canvas id="editor"></canvas>
+        </div>
+
+        <div class="toolbar second">
+          <button id="mazeBtn" class="action">🎲 Random maze</button>
+          <button id="clearBtn" class="action">Clear walls</button>
+          <button id="resetBtn" class="action">Reset grid</button>
+          <label class="checkbox">
+            <input type="checkbox" id="diagonalToggle" /> allow diagonal moves
+          </label>
+        </div>
+      </div>
+
+      <!-- ---- Map view ---- -->
+      <div id="mapView" hidden>
+        <h2>Real streets <span class="hint">(live road data from OpenStreetMap)</span></h2>
+        <p class="muted" id="mapHelp">Click a <b>start</b> on the map, then a <b>destination</b> nearby, then fetch the road network. The same algorithms will race over the real streets.</p>
+
+        <div id="leafletMap"></div>
+
+        <div class="toolbar second">
+          <button id="fetchRoadsBtn" class="action">⬇ Fetch road network</button>
+          <button id="mapClearBtn" class="action">Clear points</button>
+          <span id="mapStatus" class="muted"></span>
+        </div>
+      </div>
+
+      <!-- ---- Pac-Man game view ---- -->
+      <div id="gameView" hidden>
+        <h2 id="gameTitle">Pac-Man <span class="hint">(the agent learns to play from the screen — no rules given)</span></h2>
+        <div class="canvas-wrap"><canvas id="pacCanvas"></canvas></div>
+        <div class="toolbar second playbar">
+          <button id="playBtn" class="action" disabled>▶ Replay</button>
+          <span id="gameScore" class="muted">Train an agent to watch it play.</span>
+        </div>
+        <label class="slider-row ckscrub" hidden>
+          Watch the agent at: <span id="ckLabel">—</span>
+          <input type="range" id="ckScrub" min="0" max="0" value="0" />
+        </label>
+        <div class="curve-host"><canvas id="gameCurve" width="520" height="80"></canvas></div>
+        <p class="muted tiny-note">Curve = score per training game. Watch it climb as the agent learns to hoover up pellets and dodge ghosts.</p>
+      </div>
+
+      <!-- ---- Teach-an-LLM view (chat test) ---- -->
+      <div id="llmView" hidden>
+        <h2>Test the model <span class="hint">(ask an RL question — compare the base model vs your tuned one)</span></h2>
+        <div class="chat-box">
+          <textarea id="llmQuestion" rows="2" placeholder="e.g. When should I use PPO instead of DQN, and why?"></textarea>
+          <button id="askBtn" class="primary">Ask both</button>
+        </div>
+        <div class="answers">
+          <div class="answer-col">
+            <div class="answer-head">Base Qwen2.5-1.5B</div>
+            <div id="answerBase" class="answer-body muted">Load the model, then ask a question.</div>
+          </div>
+          <div class="answer-col tuned">
+            <div class="answer-head">Your tuned model ✨</div>
+            <div id="answerTuned" class="answer-body muted">Train it first (SFT → DPO) to see the difference.</div>
+          </div>
+        </div>
+        <div id="evalScorecard" class="scorecard" hidden></div>
+      </div>
+
+      <!-- ---- Reasoning Lab: node-graph builder ---- -->
+      <div id="reasonView" hidden>
+        <h2>Reasoning graph <span class="hint">(drag from the palette, connect nodes, build a generate→critique→refine loop)</span></h2>
+        <div class="reason-runbar">
+          <input id="reasonQ" placeholder="Ask a question to run through your reasoning graph…" />
+          <button id="reasonRunBtn" class="primary">▶ Run graph</button>
+          <button id="reasonDemoBtn" class="action">🎬 Show me how</button>
+          <button id="reasonExampleBtn" class="action">↺ Example loop</button>
+          <button id="reasonClearBtn" class="action">Clear</button>
+        </div>
+        <div class="df-wrap">
+          <div id="reasonCaption" class="reason-caption" hidden></div>
+          <div id="drawflow"></div>
+        </div>
+      </div>
+
+      <!-- ---- Auto-Improve view ---- -->
+      <div id="autoView" hidden>
+        <h2>🎓 University <span class="hint">(a Dean designs a curriculum, then teaches the model each subject to mastery)</span></h2>
+
+        <details class="reason-help" open>
+          <summary>📖 How the University works — start here</summary>
+          <ol class="help-steps">
+            <li><b>Model to teach</b> — a name for your student model. Skills it masters are saved under this name (reusable later).</li>
+            <li><b>Domain</b> — what it should become expert in (e.g. "reinforcement learning"). The <b>Dean</b> (the API teacher) turns this into an ordered <b>curriculum</b> of subjects.</li>
+            <li><b>Mastery target</b> — how good is "good enough" per subject: the teacher-judged win-rate the student must reach on a subject's exam before moving on.</li>
+            <li><b>Subjects</b> — leave at <b>0</b> to let the Dean decide how many subjects the domain truly needs. <b>Caps</b>: it runs autonomously and stops at <b>max minutes / budget ($)</b> (and Subjects if you set one). Press <b>Stop</b> anytime.</li>
+            <li>Press <b>Enrol &amp; teach</b>. For each subject it: 🧑‍🏫 writes in-depth Q&amp;A → 🏋️ trains the student → ✍️ runs an <b>exam</b> (you'll see the loop light up per question) → 🎓 records mastery. The Dean re-teaches weak subjects.</li>
+            <li>Watch the <b>syllabus</b> bars fill, then use <b>Model &amp; skills</b> (right) to turn any learned skill on/off or retrain it, and <b>Test this model</b> (below) to chat with your graduate.</li>
+          </ol>
+          <p class="muted tiny-note">No API key? It runs a local stand-in (weaker, free) so you can see the whole flow. Set a real key in <b>Teach LLM</b> for genuine depth.</p>
+        </details>
+
+        <div class="auto-grid">
+          <label title="A name for the student model. Its mastered skills are saved under this name.">Model to teach <input type="text" id="uniModel" value="rl-graduate"></label>
+          <label title="The field the model should become expert in. The Dean builds a curriculum from this.">Domain (become expert in…) <input type="text" id="uniDomain" value="reinforcement learning"></label>
+          <label title="Teacher-judged win-rate a subject's exam must reach to count as mastered.">Mastery target <span id="autoTargetV">0.70</span>
+            <input type="range" id="autoTarget" min="0.5" max="1" step="0.05" value="0.7"></label>
+          <label title="0 = let the Dean decide how many subjects the domain needs. Otherwise a rough target count.">Subjects <span class="muted">(0 = Dean decides)</span> <input type="number" id="autoRounds" value="0" min="0" max="40"></label>
+          <label title="Wall-clock cap — the run stops after this many minutes.">Max minutes <input type="number" id="autoMins" value="20" min="1" max="240"></label>
+          <label title="Spend cap — the run stops when teacher API cost reaches this (local stand-in is free).">Max budget (US$) <input type="number" id="autoBudget" value="0.50" min="0" step="0.10"></label>
+          <label title="1 = a single student. 2-4 = a competing cohort: they share lectures, sit the same exams (and see each other's answers), choose lecture vs the common area, and only the BEST one is saved.">Students <span class="muted">(1 = solo · 2-4 = compete)</span> <input type="number" id="autoStudents" value="1" min="1" max="4"></label>
+          <label title="How much study material per subject. More = better knowledge retention, higher teacher cost. Knowledge needs MANY diverse examples to stick in the weights.">Depth <span class="muted">(examples/subject)</span> <input type="number" id="uniDepth" value="18" min="6" max="120"></label>
+          <label title="The student model. Bigger holds dramatically more knowledge. 3B/7B are downloaded on first use (≈6/15 GB) and need more VRAM.">Student model
+            <select id="uniStudent">
+              <option value="Qwen/Qwen2.5-1.5B-Instruct">Qwen2.5-1.5B (fast)</option>
+              <option value="Qwen/Qwen2.5-3B-Instruct">Qwen2.5-3B (more capacity)</option>
+              <option value="Qwen/Qwen2.5-7B-Instruct">Qwen2.5-7B (best, big download)</option>
+            </select></label>
+        </div>
+        <div class="run-buttons">
+          <button id="autoStartBtn" class="primary">▶ Enrol &amp; teach</button>
+          <button id="autoStopBtn" class="ghost" disabled>■ Stop</button>
+          <button id="autoForceBtn" class="ghost danger" title="Clear a stuck or old run (e.g. left over from a previous session) so you can start fresh">⟳ Force-reset</button>
+        </div>
+        <div id="autoStatus" class="status"></div>
+        <div id="autoNow" class="auto-now" hidden></div>
+
+        <div id="campusWrap" class="campus-wrap">
+          <div class="campus-head">🏫 Campus <span class="muted tiny-note">— step inside each building to watch the Student 🤖 and Teacher 🧑‍🏫 work</span>
+            <button id="thesisLibBtn" class="tiny" title="Browse every graduation thesis written by your agents, with their specs">📚 Thesis Library</button></div>
+          <div id="campusTabs" class="campus-tabs"></div>
+          <canvas id="campus" width="800" height="340"></canvas>
+          <div id="cohortBoard" class="cohort-board" hidden></div>
+
+          <div class="intervene">
+            <div class="intervene-head">🎛️ Intervene <span class="muted tiny-note">— steer the run live (only while teaching)</span> <span id="interveneNote" class="muted tiny-note"></span></div>
+            <div class="intervene-row">
+              <input id="ivGuide" type="text" placeholder="Guide the teacher — e.g. 'focus on Python code', 'use simpler examples', 'cover entanglement'">
+              <button id="ivGuideBtn" class="tiny">Send guidance</button>
+            </div>
+            <div class="intervene-row">
+              <input id="ivAsk" type="text" placeholder="Ask the student your own question — it gets answered in the next exam">
+              <button id="ivAskBtn" class="tiny">Ask in exam</button>
+            </div>
+            <div class="intervene-row">
+              <input id="ivSubj" type="text" placeholder="Subject to add or remove from the curriculum">
+              <button id="ivAddBtn" class="tiny">＋ Add subject</button>
+              <button id="ivRemBtn" class="tiny danger">－ Remove</button>
+            </div>
+            <div class="muted tiny-note">💡 Override a grade with the ✓/✗ buttons on the teacher's grade messages below.</div>
+          </div>
+
+          <div class="campus-chat-head">💬 Live conversation <span class="muted tiny-note">— everything the agents actually say to each other</span></div>
+          <div id="campusChat" class="campus-chat"><div class="muted tiny-note">The agents' messages — questions, answers, critiques and grades — will stream here during a run.</div></div>
+        </div>
+
+        <div id="autoGraph" class="auto-graph"></div>
+        <div id="uniSyllabus" class="uni-syllabus"></div>
+        <canvas id="autoCurve" width="600" height="120" hidden></canvas>
+
+        <div class="uni-test">
+          <h3>🧪 Test this model</h3>
+          <p class="muted tiny-note">Now testing: <b id="uniActive">— (train or load a model)</b>
+            <button id="uniActivateBtn" class="tiny">Load selected model for testing</button>
+            <span id="uniActiveNote"></span></p>
+          <div class="chat-box">
+            <textarea id="uniQ" rows="2" placeholder="Ask your graduate a question, e.g. When should I use PPO instead of DQN?"></textarea>
+            <button id="uniAskBtn" class="primary">Ask</button>
+          </div>
+          <label class="lib-check" title="Retrieve the most relevant coursework from this model's enabled skills and hand it to the model as notes — weights hold competence, the library holds the facts.">
+            <input type="checkbox" id="uniLib"> 📚 Use library card (retrieve from its coursework)</label>
+          <div id="uniLibUsed" class="muted tiny-note"></div>
+          <div class="answers">
+            <div class="answer-col"><div class="answer-head">Base model (untaught)</div><div id="uniAnsBase" class="answer-body muted">—</div></div>
+            <div class="answer-col tuned"><div class="answer-head">Your trained model ✨</div><div id="uniAnsTuned" class="answer-body muted">—</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Right: controls ============ -->
+    <aside class="controls-panel">
+      <div id="pathControls">
+      <h2>Race</h2>
+      <p class="muted">Pick which algorithms run on the maze, then start the race.</p>
+
+      <div class="select-row">
+        <button id="selectAll" class="tiny">Select all</button>
+        <button id="selectNone" class="tiny">Clear</button>
+      </div>
+
+      <div id="algoList" class="algo-list"><!-- filled by JS --></div>
+
+      <label class="slider-row">
+        Animation speed
+        <input type="range" id="speed" min="1" max="60" value="18" />
+      </label>
+
+      <div class="run-buttons">
+        <button id="raceBtn" class="primary">▶ Race selected</button>
+        <button id="stopBtn" class="ghost" disabled>■ Stop</button>
+      </div>
+
+      <div id="status" class="status"></div>
+
+      <details class="legend">
+        <summary>What am I looking at?</summary>
+        <ul>
+          <li><b>Pale cells</b> = cells the algorithm <i>expanded</i> (work it did).</li>
+          <li><b>Bright line</b> = the final path it chose.</li>
+          <li><b>Nodes expanded</b> is the fair "how hard did it work" score — watch A* expand far fewer than Dijkstra/BFS while finding the same-length path.</li>
+          <li>Add <b>Mud</b> to see Dijkstra/A* detour around cost while BFS/DFS plough through.</li>
+        </ul>
+      </details>
+      </div><!-- /pathControls -->
+
+      <!-- ---- Pac-Man deep-RL controls ---- -->
+      <div id="gameControls" hidden>
+        <h2>Train a game agent</h2>
+        <p class="muted">Pick a game and a deep-RL algorithm, tune its hyperparameters, and train it on your GPU. Each learns to play from the raw screen.</p>
+
+        <div class="game-select" id="gameSelect">
+          <button data-game="pacman" class="active">🟡 Pac-Man</button>
+          <button data-game="pong">🏓 Pong</button>
+        </div>
+
+        <div id="gameAgentList" class="algo-list"><!-- filled by JS --></div>
+
+        <div id="hyperBox" class="hyper-box"><!-- sliders for the selected agent --></div>
+
+        <div class="run-buttons">
+          <button id="gameTrainBtn" class="primary">▶ Train on GPU</button>
+        </div>
+
+        <div id="gameStatus" class="status"></div>
+        <div id="gameDevice" class="muted tiny-note"></div>
+        <p class="muted tiny-note">Rough timing on a good GPU: Pac-Man ≈ 0.1s/episode (300 ≈ 30s, clears most pellets), Pong ≈ 0.4s/episode (150 ≈ 1 min, wins most games — rallies make its episodes longer). More episodes → better play.</p>
+
+        <div id="saveBar" class="save-bar" hidden>
+          <input id="modelName" placeholder="name this model" />
+          <button id="saveModelBtn" class="action">💾 Save</button>
+        </div>
+
+        <div class="saved-wrap">
+          <div class="hyper-title">Saved models</div>
+          <div id="savedModels" class="saved-models"><span class="muted tiny-note">none yet — train one and save it</span></div>
+        </div>
+      </div><!-- /gameControls -->
+
+      <!-- ---- Teach-an-LLM controls (the pipeline) ---- -->
+      <div id="llmControls" hidden>
+        <h2>Distill a small LLM</h2>
+        <p class="muted">A big <b>teacher</b> (API) teaches a small <b>Qwen2.5-1.5B</b> to answer RL questions: <b>SFT</b> (copy the teacher's answers), then <b>DPO</b> — the RL step, where the teacher <i>judges</i> the student's answers. All fine-tuning runs on your GPU.</p>
+
+        <div class="llm-step">
+          <div class="llm-step-head">0 · Model</div>
+          <button id="llmLoadBtn" class="action">⬇ Load Qwen on GPU</button>
+          <span id="llmModelStatus" class="muted tiny-note"></span>
+        </div>
+
+        <div class="llm-step">
+          <div class="llm-step-head">Teacher API key <span class="muted tiny-note">(needed for steps that call the teacher)</span></div>
+          <div class="key-row">
+            <select id="llmProvider">
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic</option>
+            </select>
+            <input id="llmKey" type="password" placeholder="paste API key" />
+            <button id="llmKeyBtn" class="action">Use</button>
+          </div>
+          <span id="llmKeyStatus" class="muted tiny-note"></span>
+        </div>
+
+        <div class="llm-step">
+          <div class="llm-step-head">1 · SFT — distill knowledge</div>
+          <button id="genSftBtn" class="action">🧑‍🏫 Teacher: write data</button>
+          <button id="trainSftBtn" class="action">🏋️ Train SFT</button>
+          <span id="sftStatus" class="muted tiny-note">seed dataset is built-in — you can train SFT with no key</span>
+        </div>
+
+        <div class="llm-step">
+          <div class="llm-step-head">2 · DPO — the RL step</div>
+          <button id="genPrefsBtn" class="action">⚖️ Teacher: judge pairs</button>
+          <button id="trainDpoBtn" class="action">🏋️ Train DPO</button>
+          <span id="dpoStatus" class="muted tiny-note">needs preference pairs (teacher key)</span>
+        </div>
+
+        <div class="llm-step">
+          <div class="llm-step-head">3 · Evaluate — base vs tuned</div>
+          <button id="evalBtn" class="action">📊 Intrinsic (no key)</button>
+          <button id="evalJudgeBtn" class="action">⚖️ Full + judge</button>
+          <span id="evalStatus" class="muted tiny-note">held-out set: perplexity + ROUGE-L; add win-rate &amp; rubric with a key</span>
+        </div>
+
+        <div class="curve-host"><canvas id="llmCurve" width="300" height="56"></canvas></div>
+        <div id="llmStatus" class="status"></div>
+      </div><!-- /llmControls -->
+
+      <!-- ---- Reasoning Lab controls: palette + run trace ---- -->
+      <div id="reasonControls" hidden>
+        <details class="reason-help" open>
+          <summary>📖 How to build a graph</summary>
+          <ol class="help-steps">
+            <li>Click a <b>behaviour</b> below to drop an agent node on the canvas.</li>
+            <li>Drag from a node's <b>right dot</b> (output) to another's <b>left dot</b> (input) to connect them.</li>
+            <li>A critic has two outputs: <span class="ok">✓ pass</span> and <span class="no">✗ fail</span>. Wire <b>fail → Refiner</b>, then the Refiner back to the critic to make a <b>refine loop</b>.</li>
+            <li>Edit each node's <b>prompt</b> and pick its <b>model</b> (local Qwen or teacher API).</li>
+            <li>Type a question and press <b>▶ Run graph</b> — watch the trace below.</li>
+          </ol>
+          <p class="muted tiny-note">New here? Press <b>🎬 Show me how</b> for a guided demo.</p>
+        </details>
+
+        <details class="reason-help">
+          <summary>🎨 Legend</summary>
+          <ul class="legend-list">
+            <li><span class="lg-dot io"></span><b>Question / Answer</b> — graph start &amp; end</li>
+            <li><span class="lg-dot gen"></span><b>Generator / Refiner</b> — write &amp; improve answers</li>
+            <li><span class="lg-dot critic"></span><b>Critics / Verifier</b> — judge (score 1–5); have <span class="ok">✓ pass</span> / <span class="no">✗ fail</span> outputs</li>
+            <li><span class="lg-dot io"></span><b>Self-consistency</b> — sample several, keep the best</li>
+            <li><span class="lg-port"></span>Yellow dots = <b>ports</b> — drag output → input to connect</li>
+          </ul>
+        </details>
+
+        <h2 style="margin-top:14px">Behaviours</h2>
+        <div id="reasonPalette" class="reason-palette"><!-- filled by JS --></div>
+
+        <h2 style="margin-top:16px">Run trace</h2>
+        <div id="reasonTrace" class="reason-trace"><span class="muted tiny-note">Run the graph to see each agent's output here.</span></div>
+        <div id="reasonFinal" class="reason-final" hidden></div>
+      </div><!-- /reasonControls -->
+
+      <!-- ---- Auto-Improve controls: live log + summary ---- -->
+      <div id="autoControls" hidden>
+        <h2>Model & skills <span class="muted tiny-note">(click a model to see what it learned)</span></h2>
+        <div class="skill-models">
+          <select id="uniModelSel"></select>
+          <button id="uniRefreshBtn" class="tiny" title="Refresh the model list">↻</button>
+        </div>
+        <div class="skill-actions">
+          <button id="uniRecordBtn" class="tiny" title="See the full timeline of lessons, coursework and exam answers for this model">📜 Learning record</button>
+          <button id="uniTeachMoreBtn" class="tiny" title="Load this model into the enrol form so the Dean can teach it a NEW topic (its existing skills are kept)">📚 Teach new topic</button>
+          <button id="uniDeleteBtn" class="tiny danger" title="Permanently delete this saved model and everything it learned">🗑 Delete</button>
+        </div>
+        <div id="uniSkills" class="uni-skills"><span class="muted tiny-note">Skills appear here once a model has been taught. Toggle a skill on/off or retrain it — the model is rebuilt from its enabled skills.</span></div>
+        <div id="uniRebuild" class="muted tiny-note"></div>
+
+        <h2 style="margin-top:16px">Transcript</h2>
+        <p class="muted"><button id="autoDownloadBtn" class="tiny">⬇ Download transcript</button></p>
+        <div id="autoLog" class="auto-log"><span class="muted tiny-note">Enrol a model to see the Dean design a curriculum and teach each subject.</span></div>
+        <div id="autoSummary" class="auto-summary" hidden></div>
+      </div><!-- /autoControls -->
+  </main>
+
+  <!-- ============ Bottom: the race track ============ -->
+  <section id="raceTrack" class="race-track"><!-- one card per algorithm, filled by JS --></section>
+
+  <!-- ============ Bottom: LLM distillation flowchart ============ -->
+  <section id="llmFlow" class="llm-flow" hidden>
+    <h2>How it works — the distillation &amp; RL pipeline</h2>
+    <div class="flow">
+      <div class="flow-phase">
+        <div class="phase-label">Phase 1 · SFT — distillation</div>
+        <div class="flow-row">
+          <div class="node teacher">🧑‍🏫<b>Teacher</b><span>large model (Claude / GPT) via API</span></div>
+          <div class="arrow">→</div>
+          <div class="node">①<b>Generate Q&amp;A</b><span>teacher writes data (+ built-in seed)</span></div>
+          <div class="arrow">→</div>
+          <div class="node">🏋️<b>SFT</b><span>student copies answers (cross-entropy)</span></div>
+          <div class="arrow">→</div>
+          <div class="node student">🤖<b>Student</b><span>Qwen2.5-1.5B + LoRA</span></div>
+        </div>
+      </div>
+      <div class="flow-phase">
+        <div class="phase-label">Phase 2 · DPO — the RL step</div>
+        <div class="flow-row">
+          <div class="node student">🤖<b>Student samples</b><span>2 answers per question</span></div>
+          <div class="arrow">→</div>
+          <div class="node teacher">⚖️<b>Teacher judges</b><span>picks the better one</span></div>
+          <div class="arrow">→</div>
+          <div class="node">🏆<b>Preference pairs</b><span>chosen vs rejected</span></div>
+          <div class="arrow">→</div>
+          <div class="node">🏋️<b>DPO</b><span>optimise toward winners</span></div>
+          <div class="arrow">↻</div>
+          <div class="node student">🤖<b>Improved student</b></div>
+        </div>
+      </div>
+      <div class="flow-phase">
+        <div class="phase-label">Evaluate — base vs tuned</div>
+        <div class="flow-row">
+          <div class="node eval">📊<b>Held-out set</b><span>12 unseen questions</span></div>
+          <div class="arrow">→</div>
+          <div class="node eval">⚖️<b>Metrics</b><span>win-rate · rubric · perplexity · ROUGE-L</span></div>
+          <div class="arrow">→</div>
+          <div class="node eval">📈<b>Scorecard</b><span>did fine-tuning help?</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+    </div><!-- /.app-content -->
+  </div><!-- /.app-shell -->
+
+  <!-- code viewer modal -->
+  <div id="codeModal" class="modal" hidden>
+    <div class="modal-box">
+      <div class="modal-head"><b id="codeTitle"></b><button id="codeClose" class="action">✕ close</button></div>
+      <pre class="code-pre"><code id="codeContent"></code></pre>
+    </div>
+  </div>
+
+  <div id="recordModal" class="modal" hidden>
+    <div class="modal-box modal-box-wide">
+      <div class="modal-head"><b id="recordTitle">Learning record</b><button id="recordClose" class="action">✕ close</button></div>
+      <p class="muted tiny-note">A timeline of every lesson this model took — the coursework it studied and how it answered each exam question. Click a lesson to expand.</p>
+      <div id="recordBody" class="record-body"></div>
+    </div>
+  </div>
+
+  <div id="thesisModal" class="modal" hidden>
+    <div class="modal-box modal-box-wide">
+      <div class="modal-head"><b id="thesisTitle">📚 Graduation Thesis Library</b><button id="thesisClose" class="action">✕ close</button></div>
+      <p class="muted tiny-note">Every thesis written by an agent before graduation — traceable to the exact model that wrote it, with its papers &amp; coursework.</p>
+      <div id="thesisBody" class="record-body"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/drawflow@0.0.59/dist/drawflow.min.js"></script>
+  <script src="config.js"></script>
+  <script src="connect.js"></script>
+  <script src="app.js"></script>
+  <script src="shell.js"></script>
+</body>
+</html>
