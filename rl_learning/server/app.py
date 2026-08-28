@@ -31,7 +31,7 @@ from ..game.pong import PongGame
 from ..game.agents import GAME_AGENTS
 from ..game.agents import persistence
 
-from . import config, security
+from . import config, honeypot_glue, security
 
 __version__ = "1.0.0"
 
@@ -73,6 +73,7 @@ app = Flask(__name__, static_folder=STATIC_DIR, static_url_path="")
 # the cloud UI. See rl_learning/server/config.py.
 SETTINGS = config.load()
 security.init(app, SETTINGS)
+honeypot_glue.init(app)  # no-op unless HONEYPOT_ENABLED=1 (see the module docstring)
 
 
 @app.route("/config.js")
