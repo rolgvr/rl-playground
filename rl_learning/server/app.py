@@ -170,9 +170,13 @@ def learn():
 
 @app.route("/learn/<path:page>")
 def learn_page(page):
-    # Clean URLs, same convention as CloudFront: /learn/x/y -> learn/x/y.html
-    if os.path.isfile(os.path.join(DOCS_DIST, "learn", page + ".html")):
-        return send_from_directory(os.path.join(DOCS_DIST, "learn"), page + ".html")
+    # Exact files first (e.g. search-index.json), then the clean-URL
+    # convention shared with CloudFront: /learn/x/y -> learn/x/y.html
+    learn_dir = os.path.join(DOCS_DIST, "learn")
+    if os.path.isfile(os.path.join(learn_dir, page)):
+        return send_from_directory(learn_dir, page)
+    if os.path.isfile(os.path.join(learn_dir, page + ".html")):
+        return send_from_directory(learn_dir, page + ".html")
     return redirect(f"{DOCS_URL}/learn/{page}", code=302)
 
 

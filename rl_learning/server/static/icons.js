@@ -37,6 +37,7 @@
     plus:   '<path d="M12 5v14M5 12h14"/>',
     minus:  '<path d="M5 12h14"/>',
     check:  '<path d="m5 13 4 4L19 7"/>',
+    search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 5 5"/>',
     bolt:   '<path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H13z"/>',
     plug:   '<path d="M9 3v5M15 3v5"/><path d="M6.5 8h11l-1 5a4.5 4.5 0 0 1-4.5 4 4.5 4.5 0 0 1-4.5-4z"/><path d="M12 17v4"/>',
     lock:   '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>',
