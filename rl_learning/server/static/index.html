@@ -3,32 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RL Playground — learn search, reinforcement learning & agentic LLMs by watching them work</title>
-  <meta name="description" content="A hands-on learning platform that takes you from pathfinding (BFS, A*) through reinforcement learning (DQN, PPO) to agentic LLMs (SFT, DPO, reasoning loops) — read the theory, then watch the algorithms run on your own GPU." />
+  <title>SafeZone AI Learn — watch algorithms work, from pathfinding to agentic LLMs</title>
+  <meta name="description" content="A hands-on learning platform for the AI stack. Start with the Reinforcement Learning track — pathfinding (BFS, A*), deep RL (DQN, PPO), agentic LLMs (SFT, DPO, reasoning loops) — read the theory, then watch it run on your own GPU. ML, LLM engineering and DevOps tracks are on the way." />
+  <meta property="og:title" content="SafeZone AI Learn" />
+  <meta property="og:description" content="Learn the AI stack by watching it work. Theory plus a live playground that runs on your own machine." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://rl.safezoneaitech.com/" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235b8cff' d='M12 2 22 12 12 22 2 12z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="page">
+  <script src="icons.js"></script>
+
   <div class="topbar">
     <a class="brand" href="/">
       <span class="brand-mark">◆</span>
-      <span class="brand-name">RL Playground</span>
+      <span class="brand-name">SafeZone AI Learn</span>
     </a>
     <nav class="topnav">
       <a href="/" class="active">Home</a>
       <a href="/learn">Learn</a>
       <a href="/play">Playground</a>
     </nav>
+    <div class="topbar-tools">
+      <button class="theme-toggle ghost" data-theme-toggle aria-label="Switch between light and dark theme" title="Switch theme">
+        <svg class="ic tt-sun"><use href="#i-sun"></use></svg>
+        <svg class="ic tt-moon"><use href="#i-moon"></use></svg>
+      </button>
+    </div>
   </div>
 
   <main class="page-main">
     <!-- Hero -->
     <section class="hero">
-      <p class="hero-kicker">search → reinforcement learning → agentic LLMs</p>
-      <h1 class="hero-title">Learn RL by <span class="accent">watching it work</span>.</h1>
+      <p class="hero-kicker">theory → playground → your own GPU</p>
+      <h1 class="hero-title">Learn the AI stack by <span class="accent">watching it work</span>.</h1>
       <p class="hero-lede">
-        One ladder, six rungs. Start with a maze-solving search you can draw, climb to agents
-        that teach themselves Pac-Man, and end at LLMs that learn from an AI teacher and reason in
-        loops. Read the theory, then run the real thing — on your own machine, nothing hidden.
+        Every lesson pairs real theory with a live experiment: draw a maze and race A* against
+        Dijkstra, train an agent that teaches itself Pac-Man, distil and interrogate an LLM.
+        Nothing is a video — everything runs, on your own machine, nothing hidden.
       </p>
       <div class="hero-cta">
         <a href="/learn" class="btn btn-primary">Start with the theory →</a>
@@ -36,38 +53,74 @@
       </div>
     </section>
 
+    <!-- Track catalog -->
+    <section class="track-catalog">
+      <h2 class="section-h">Pick a track</h2>
+      <p class="section-sub">One platform, growing toward the full ML · AI · DevOps stack. The first track is live.</p>
+
+      <div class="tracks">
+        <a class="track-card" href="/learn">
+          <span class="track-ic"><svg class="ic ic-lg"><use href="#i-cap"></use></svg></span>
+          <h3>Reinforcement Learning</h3>
+          <p>Search → RL → agentic LLMs: six lessons that each reuse the one below, from a maze you draw to a Dean that teaches a model to mastery.</p>
+          <span class="track-meta"><span>6 lessons · live</span><span class="go">Start →</span></span>
+        </a>
+        <div class="track-card soon">
+          <span class="badge-soon">in development</span>
+          <span class="track-ic"><svg class="ic ic-lg"><use href="#i-flask"></use></svg></span>
+          <h3>ML Fundamentals</h3>
+          <p>Regression to gradient boosting — watch models fit, overfit and generalise on data you can poke.</p>
+          <span class="track-meta"><span>coming</span></span>
+        </div>
+        <div class="track-card soon">
+          <span class="badge-soon">in development</span>
+          <span class="track-ic"><svg class="ic ic-lg"><use href="#i-chip"></use></svg></span>
+          <h3>LLM Engineering</h3>
+          <p>Tokenisers, attention, RAG and evals — the stack behind every AI product, opened up live.</p>
+          <span class="track-meta"><span>coming</span></span>
+        </div>
+        <div class="track-card soon">
+          <span class="badge-soon">in development</span>
+          <span class="track-ic"><svg class="ic ic-lg"><use href="#i-server"></use></svg></span>
+          <h3>DevOps</h3>
+          <p>Containers, CI/CD and infrastructure as code — ship what you build, the way this platform ships itself.</p>
+          <span class="track-meta"><span>coming</span></span>
+        </div>
+      </div>
+    </section>
+
     <!-- The three parts -->
     <section class="trio">
       <div class="trio-card">
-        <div class="trio-ic">📚</div>
+        <span class="trio-ic"><svg class="ic ic-lg"><use href="#i-book"></use></svg></span>
         <h3>Learn</h3>
         <p>Every algorithm and method, explained properly — the idea, the math, pseudocode, and when to reach for it.</p>
         <a href="/learn">Read the theory →</a>
       </div>
       <div class="trio-card">
-        <div class="trio-ic">🎮</div>
+        <span class="trio-ic"><svg class="ic ic-lg"><use href="#i-play"></use></svg></span>
         <h3>Play</h3>
         <p>The practical half. Draw a maze, race the algorithms, train an agent, teach an LLM — and see every result animate live.</p>
         <a href="/play">Open the playground →</a>
       </div>
       <div class="trio-card">
-        <div class="trio-ic">🔒</div>
+        <span class="trio-ic"><svg class="ic ic-lg"><use href="#i-lock"></use></svg></span>
         <h3>Your machine</h3>
         <p>The playground computes on <em>your</em> GPU via a small worker you run locally. Your models and API keys never leave it.</p>
         <a href="/learn#how">How it works →</a>
       </div>
     </section>
 
-    <!-- The ladder -->
+    <!-- The RL track syllabus -->
     <section class="ladder-overview">
-      <h2 class="section-h">The learning ladder</h2>
-      <p class="section-sub">Each rung reuses the one below it. Follow the path top to bottom, or jump anywhere.</p>
+      <h2 class="section-h">Inside the RL track</h2>
+      <p class="section-sub">Each lesson reuses the one below it. Follow the path top to bottom, or jump anywhere.</p>
 
       <ol class="rung-cards">
         <li class="rung-card" data-act="Search">
           <span class="rc-n">1</span>
           <div class="rc-body">
-            <h3>▦ Grid maze <span class="rc-tag free">worker</span></h3>
+            <h3><svg class="ic"><use href="#i-grid"></use></svg> Grid maze <span class="rc-tag free">worker</span></h3>
             <p>Classic pathfinding on a maze you draw — BFS, DFS, Dijkstra, A*, greedy and bidirectional search, racing side by side.</p>
             <div class="rc-links"><a href="/learn#pathfinding">Theory</a> · <a href="/play">Try it</a></div>
           </div>
@@ -75,15 +128,15 @@
         <li class="rung-card" data-act="Search">
           <span class="rc-n">2</span>
           <div class="rc-body">
-            <h3>🗺 Real streets <span class="rc-tag free">worker</span></h3>
+            <h3><svg class="ic"><use href="#i-route"></use></svg> Real streets <span class="rc-tag free">worker</span></h3>
             <p>The very same searches, now racing over a live OpenStreetMap road graph. A* vs Dijkstra, made tangible on real cities.</p>
             <div class="rc-links"><a href="/learn#pathfinding">Theory</a> · <a href="/play">Try it</a></div>
           </div>
         </li>
-        <li class="rung-card" data-act="Reinforcement Learning">
+        <li class="rung-card" data-act="Deep RL">
           <span class="rc-n">3</span>
           <div class="rc-body">
-            <h3>🎮 Deep RL <span class="rc-tag gpu">GPU</span></h3>
+            <h3><svg class="ic"><use href="#i-gamepad"></use></svg> Deep RL <span class="rc-tag gpu">GPU</span></h3>
             <p>An agent learns Pac-Man &amp; Pong straight from the pixels — the DQN family and the policy-gradient family (REINFORCE, A2C, PPO).</p>
             <div class="rc-links"><a href="/learn#deep-rl">Theory</a> · <a href="/play">Try it</a></div>
           </div>
@@ -91,7 +144,7 @@
         <li class="rung-card" data-act="Agentic LLMs">
           <span class="rc-n">4</span>
           <div class="rc-body">
-            <h3>🧠 Teach an LLM <span class="rc-tag gpu">GPU</span></h3>
+            <h3><svg class="ic"><use href="#i-chip"></use></svg> Teach an LLM <span class="rc-tag gpu">GPU</span></h3>
             <p>Distil a large teacher into a small student model — supervised fine-tuning, then DPO, the RL-from-AI-feedback step.</p>
             <div class="rc-links"><a href="/learn#teach-llm">Theory</a> · <a href="/play">Try it</a></div>
           </div>
@@ -99,7 +152,7 @@
         <li class="rung-card" data-act="Agentic LLMs">
           <span class="rc-n">5</span>
           <div class="rc-body">
-            <h3>🔁 Reasoning Lab <span class="rc-tag gpu">GPU</span></h3>
+            <h3><svg class="ic"><use href="#i-loop"></use></svg> Reasoning Lab <span class="rc-tag gpu">GPU</span></h3>
             <p>Wire prompted agents into generate → critique → refine loops — the Self-Refine / Reflexion pattern, built by hand.</p>
             <div class="rc-links"><a href="/learn#reasoning">Theory</a> · <a href="/play">Try it</a></div>
           </div>
@@ -107,7 +160,7 @@
         <li class="rung-card" data-act="Agentic LLMs">
           <span class="rc-n">6</span>
           <div class="rc-body">
-            <h3>🎓 University <span class="rc-tag gpu">GPU</span></h3>
+            <h3><svg class="ic"><use href="#i-cap"></use></svg> University <span class="rc-tag gpu">GPU</span></h3>
             <p>A Dean agent designs a curriculum and teaches a model each subject to mastery — solo, or a competing cohort of students.</p>
             <div class="rc-links"><a href="/learn#university">Theory</a> · <a href="/play">Try it</a></div>
           </div>
@@ -127,8 +180,8 @@
   </main>
 
   <footer class="page-foot">
-    <span>RL Playground — an open, hands-on RL learning platform.</span>
-    <span><a href="https://github.com/rolgvr/rl-playground" target="_blank" rel="noopener">Source</a></span>
+    <span>SafeZone AI Learn — an open, hands-on learning platform for the AI stack.</span>
+    <span><a href="https://github.com/rolgvr/rl-playground" target="_blank" rel="noopener"><svg class="ic"><use href="#i-github"></use></svg> Source</a></span>
   </footer>
 </body>
 </html>

@@ -161,6 +161,17 @@ def play():
     return send_from_directory(STATIC_DIR, "play.html")
 
 
+@app.errorhandler(404)
+def not_found(_err):
+    """Match the cloud deployment: unknown paths get the styled 404 page.
+
+    API calls still get JSON, so fetch() callers never try to parse HTML.
+    """
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "not found"}), 404
+    return send_from_directory(STATIC_DIR, "404.html"), 404
+
+
 @app.route("/api/algorithms")
 def list_algorithms():
     """Tell the UI which algorithms exist and how to describe them."""

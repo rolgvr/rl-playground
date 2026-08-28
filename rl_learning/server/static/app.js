@@ -28,6 +28,15 @@ const ALGO_COLOR = {
   bi_astar: "#e0aaff",
 };
 
+// ------------------------------------------------------------- theme bridge
+// Canvas 2D can't use var(--x), so the world/curve renderers resolve the SAME
+// CSS tokens the stylesheet uses via RLTheme (theme.js). T() keeps a fallback
+// so app.js still renders if theme.js is somehow missing.
+const T = (token, fallback) => (window.RLTheme && RLTheme.get(token)) || fallback;
+// When the theme flips, re-render the theme-following canvases. Animated
+// surfaces (races, curves, games) pick the new tokens up on their next frame.
+document.addEventListener("rl-theme-change", () => { redrawEditor(); });
+
 // ---------------------------------------------------------------- state
 const state = {
   rows: ROWS,
@@ -62,7 +71,7 @@ editor.width = COLS * EDITOR_CELL;
 editor.height = ROWS * EDITOR_CELL;
 
 function drawGrid(ctx, cell, opts = {}) {
-  const { visited, path, visitedColor = "#2a4a7a", pathColor = "#ffd166" } = opts;
+  const { visited, path, visitedColor = T("--visited", "#2a4a7a"), pathColor = T("--path", "#ffd166") } = opts;
   const { rows, cols, walls, weights, start, goal } = state;
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -71,9 +80,9 @@ function drawGrid(ctx, cell, opts = {}) {
     for (let c = 0; c < cols; c++) {
       const x = c * cell, y = r * cell;
       const k = key(r, c);
-      let fill = "#11141b";
-      if (walls.has(k)) fill = "#2b2f3c";
-      else if (weights.has(k)) fill = "#6b4f2a";
+      let fill = T("--cell", "#11141b");
+      if (walls.has(k)) fill = T("--wall", "#2b2f3c");
+      else if (weights.has(k)) fill = T("--mud", "#6b4f2a");
       ctx.fillStyle = fill;
       ctx.fillRect(x, y, cell, cell);
     }
@@ -91,7 +100,7 @@ function drawGrid(ctx, cell, opts = {}) {
   }
 
   // grid lines
-  ctx.strokeStyle = "#262b38";
+  ctx.strokeStyle = T("--grid-line", "#262b38");
   ctx.lineWidth = 1;
   for (let r = 0; r <= rows; r++) {
     ctx.beginPath(); ctx.moveTo(0, r * cell); ctx.lineTo(cols * cell, r * cell); ctx.stroke();
@@ -115,8 +124,8 @@ function drawGrid(ctx, cell, opts = {}) {
   }
 
   // start / goal markers
-  drawMarker(ctx, cell, start, "#3ad29f");
-  drawMarker(ctx, cell, goal, "#ff5c7a");
+  drawMarker(ctx, cell, start, T("--start", "#3ad29f"));
+  drawMarker(ctx, cell, goal, T("--goal", "#ff5c7a"));
 }
 
 function drawMarker(ctx, cell, [r, c], color) {
@@ -239,8 +248,10 @@ let mapMarkers = [];           // start/goal pins
 let networkLayer = null;       // drawn road graph
 let pathLayers = [];           // result polylines on the big map
 
+// The old flat tab row is gone (the shell rail is the navigation); the lookup
+// stays guarded so this file also runs on pages without it.
 const viewToggle = document.getElementById("viewToggle");
-viewToggle.addEventListener("click", (e) => {
+if (viewToggle) viewToggle.addEventListener("click", (e) => {
   const btn = e.target.closest("button");
   if (!btn) return;
   setView(btn.dataset.view);
@@ -464,9 +475,9 @@ function makeProjector(bounds, w, h, pad = 8) {
 // the animation), so each frame only redraws the growing explored set + path.
 function renderRoadBase(canvas, road, project) {
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#11141b";
+  ctx.fillStyle = T("--cell", "#11141b");
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = "#33384a";
+  ctx.strokeStyle = T("--road-base", "#33384a");
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (const [a, b] of road.edges) {
@@ -493,7 +504,7 @@ function drawRoadCard(c, showPath) {
   }
 
   if (showPath && c.trace.path.length > 1) {
-    ctx.strokeStyle = "#ffffff";
+    ctx.strokeStyle = T("--path-final", "#ffffff");
     ctx.lineWidth = 2.5;
     ctx.lineJoin = "round";
     ctx.beginPath();
@@ -506,7 +517,7 @@ function drawRoadCard(c, showPath) {
   }
 
   // start / goal
-  for (const [id, col] of [[road.start, "#3ad29f"], [road.goal, "#ff5c7a"]]) {
+  for (const [id, col] of [[road.start, T("--start", "#3ad29f")], [road.goal, T("--goal", "#ff5c7a")]]) {
     const p = road.nodes[id]; if (!p) continue;
     const [x, y] = project(p[0], p[1]);
     ctx.fillStyle = col;
@@ -574,8 +585,8 @@ function drawCard(c, showPath) {
   drawGrid(c.ctx, c.cell, {
     visited: c.visited,
     path: showPath ? c.trace.path.map(([r, col]) => [r, col]) : null,
-    visitedColor: ALGO_COLOR[c.algo.id] || "#2a4a7a",
-    pathColor: "#ffffff",
+    visitedColor: ALGO_COLOR[c.algo.id] || T("--visited", "#2a4a7a"),
+    pathColor: T("--path-final", "#ffffff"),
   });
 }
 
@@ -730,7 +741,7 @@ async function loadGameAgents() {
     item.dataset.id = ag.id;
     item.innerHTML = `
       <div class="row">
-        <span class="swatch" style="background:#ffd166"></span>
+        <span class="swatch" style="background:var(--warn)"></span>
         <b>${ag.label}</b><span class="fam">${ag.family}</span>
       </div>
       <p>${ag.blurb}</p>
@@ -858,10 +869,10 @@ function drawPong(frame) {
 function drawGameCurve(scores) {
   const ctx = document.getElementById("gameCurve").getContext("2d");
   const w = ctx.canvas.width, h = ctx.canvas.height;
-  ctx.fillStyle = "#11141b"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = T("--cell", "#11141b"); ctx.fillRect(0, 0, w, h);
   if (scores.length < 2) return;
   const lo = Math.min(...scores), hi = Math.max(...scores, lo + 1);
-  ctx.strokeStyle = "#ffe14d"; ctx.lineWidth = 1.5; ctx.beginPath();
+  ctx.strokeStyle = T("--curve-score", "#ffe14d"); ctx.lineWidth = 1.5; ctx.beginPath();
   scores.forEach((s, i) => {
     const px = (i / (scores.length - 1)) * (w - 6) + 3;
     const py = h - 4 - ((s - lo) / (hi - lo)) * (h - 8);
@@ -1041,8 +1052,8 @@ async function refreshModels() {
     row.innerHTML = `
       <div class="saved-meta"><b>${m.name}</b><span class="muted tiny-note">${m.game} · ${m.variant} · ${m.episodes}ep${score}</span></div>
       <div class="saved-btns">
-        <button class="action testbtn">▶ Watch</button>
-        <button class="action delbtn">🗑</button>
+        <button class="action testbtn">${icon("play")} Watch</button>
+        <button class="action delbtn" aria-label="Delete this model" title="Delete">${icon("trash")}</button>
       </div>`;
     row.querySelector(".testbtn").onclick = () => testModel(m.name);
     row.querySelector(".delbtn").onclick = async () => {
@@ -1096,10 +1107,10 @@ function renderLlmStatus(s) {
 function llmDrawCurve(curve) {
   const ctx = document.getElementById("llmCurve").getContext("2d");
   const w = ctx.canvas.width, h = ctx.canvas.height;
-  ctx.fillStyle = "#11141b"; ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = T("--cell", "#11141b"); ctx.fillRect(0, 0, w, h);
   if (!curve || curve.length < 2) return;
   const lo = Math.min(...curve), hi = Math.max(...curve, lo + 1e-6);
-  ctx.strokeStyle = "#3ad29f"; ctx.lineWidth = 1.5; ctx.beginPath();
+  ctx.strokeStyle = T("--curve-loss", "#3ad29f"); ctx.lineWidth = 1.5; ctx.beginPath();
   curve.forEach((v, i) => {
     const px = (i / (curve.length - 1)) * (w - 4) + 2;
     const py = h - 3 - ((v - lo) / (hi - lo)) * (h - 6);

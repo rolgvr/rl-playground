@@ -3,27 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RL Learning · Pathfinding Race</title>
+  <title>Playground — SafeZone AI Learn</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235b8cff' d='M12 2 22 12 12 22 2 12z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drawflow@0.0.59/dist/drawflow.min.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <script src="icons.js"></script>
+
   <div class="topbar">
     <a class="brand" href="/">
       <span class="brand-mark">◆</span>
-      <span class="brand-name">RL Playground</span>
+      <span class="brand-name">SafeZone AI Learn</span>
     </a>
     <nav class="topnav">
       <a href="/">Home</a>
       <a href="/learn">Learn</a>
       <a href="/play" class="active">Playground</a>
     </nav>
-    <!-- Which machine is doing the work. Hidden entirely when the Python server
-         is serving this page, because then the answer is "this one". -->
-    <div id="workerBar" hidden>
-      <span id="workerStatus" class="worker-pill worker-off">Checking for a worker…</span>
-      <button id="workerConnectBtn" class="worker-btn">Connect worker</button>
+    <div class="topbar-tools">
+      <!-- Which machine is doing the work. Hidden entirely when the Python server
+           is serving this page, because then the answer is "this one". -->
+      <div id="workerBar" hidden>
+        <span id="workerStatus" class="worker-pill worker-off">Checking for a worker…</span>
+        <button id="workerConnectBtn" class="worker-btn">Connect worker</button>
+      </div>
+      <button class="theme-toggle ghost" data-theme-toggle aria-label="Switch between light and dark theme" title="Switch theme">
+        <svg class="ic tt-sun"><use href="#i-sun"></use></svg>
+        <svg class="ic tt-moon"><use href="#i-moon"></use></svg>
+      </button>
     </div>
   </div>
 
@@ -88,28 +101,17 @@ pip install -e .</code></pre>
   <main>
     <!-- ============ Left: the shared editable world ============ -->
     <section class="editor-panel">
-      <div class="view-toggle" id="viewToggle">
-        <button data-view="grid" class="active">▦ Grid maze</button>
-        <button data-view="map">🗺 Real streets</button>
-        <!-- These four need real VRAM. connect.js greys them out until a worker
-             with a CUDA GPU is attached. -->
-        <button data-view="game" data-needs-gpu>🎮 Play (Deep RL)</button>
-        <button data-view="llm" data-needs-gpu>🧠 Teach LLM</button>
-        <button data-view="reason" data-needs-gpu>🔁 Reasoning Lab</button>
-        <button data-view="auto" data-needs-gpu>🎓 University</button>
-      </div>
-
       <!-- ---- Grid view ---- -->
       <div id="gridView">
         <h2>The world <span class="hint">(this same grid is sent to every algorithm)</span></h2>
 
         <div class="toolbar">
           <div class="tool-group" id="modeButtons">
-            <button class="tool active" data-mode="wall">🧱 Wall</button>
-            <button class="tool" data-mode="weight">🟫 Mud (cost 5)</button>
-            <button class="tool" data-mode="start">🟢 Start</button>
-            <button class="tool" data-mode="goal">🔴 Goal</button>
-            <button class="tool" data-mode="erase">🧽 Erase</button>
+            <button class="tool active" data-mode="wall"><svg class="ic"><use href="#i-wall"></use></svg> Wall</button>
+            <button class="tool" data-mode="weight"><svg class="ic"><use href="#i-droplet"></use></svg> Mud (cost 5)</button>
+            <button class="tool" data-mode="start"><svg class="ic"><use href="#i-flag"></use></svg> Start</button>
+            <button class="tool" data-mode="goal"><svg class="ic"><use href="#i-target"></use></svg> Goal</button>
+            <button class="tool" data-mode="erase"><svg class="ic"><use href="#i-eraser"></use></svg> Erase</button>
           </div>
         </div>
 
@@ -118,7 +120,7 @@ pip install -e .</code></pre>
         </div>
 
         <div class="toolbar second">
-          <button id="mazeBtn" class="action">🎲 Random maze</button>
+          <button id="mazeBtn" class="action"><svg class="ic"><use href="#i-dice"></use></svg> Random maze</button>
           <button id="clearBtn" class="action">Clear walls</button>
           <button id="resetBtn" class="action">Reset grid</button>
           <label class="checkbox">
@@ -135,7 +137,7 @@ pip install -e .</code></pre>
         <div id="leafletMap"></div>
 
         <div class="toolbar second">
-          <button id="fetchRoadsBtn" class="action">⬇ Fetch road network</button>
+          <button id="fetchRoadsBtn" class="action"><svg class="ic"><use href="#i-download"></use></svg> Fetch road network</button>
           <button id="mapClearBtn" class="action">Clear points</button>
           <span id="mapStatus" class="muted"></span>
         </div>
@@ -146,7 +148,7 @@ pip install -e .</code></pre>
         <h2 id="gameTitle">Pac-Man <span class="hint">(the agent learns to play from the screen — no rules given)</span></h2>
         <div class="canvas-wrap"><canvas id="pacCanvas"></canvas></div>
         <div class="toolbar second playbar">
-          <button id="playBtn" class="action" disabled>▶ Replay</button>
+          <button id="playBtn" class="action" disabled><svg class="ic"><use href="#i-play"></use></svg> Replay</button>
           <span id="gameScore" class="muted">Train an agent to watch it play.</span>
         </div>
         <label class="slider-row ckscrub" hidden>
@@ -182,9 +184,9 @@ pip install -e .</code></pre>
         <h2>Reasoning graph <span class="hint">(drag from the palette, connect nodes, build a generate→critique→refine loop)</span></h2>
         <div class="reason-runbar">
           <input id="reasonQ" placeholder="Ask a question to run through your reasoning graph…" />
-          <button id="reasonRunBtn" class="primary">▶ Run graph</button>
-          <button id="reasonDemoBtn" class="action">🎬 Show me how</button>
-          <button id="reasonExampleBtn" class="action">↺ Example loop</button>
+          <button id="reasonRunBtn" class="primary"><svg class="ic"><use href="#i-play"></use></svg> Run graph</button>
+          <button id="reasonDemoBtn" class="action"><svg class="ic"><use href="#i-play"></use></svg> Show me how</button>
+          <button id="reasonExampleBtn" class="action"><svg class="ic"><use href="#i-refresh"></use></svg> Example loop</button>
           <button id="reasonClearBtn" class="action">Clear</button>
         </div>
         <div class="df-wrap">
@@ -195,10 +197,10 @@ pip install -e .</code></pre>
 
       <!-- ---- Auto-Improve view ---- -->
       <div id="autoView" hidden>
-        <h2>🎓 University <span class="hint">(a Dean designs a curriculum, then teaches the model each subject to mastery)</span></h2>
+        <h2><svg class="ic"><use href="#i-cap"></use></svg> University <span class="hint">(a Dean designs a curriculum, then teaches the model each subject to mastery)</span></h2>
 
         <details class="reason-help" open>
-          <summary>📖 How the University works — start here</summary>
+          <summary><svg class="ic"><use href="#i-book"></use></svg> How the University works — start here</summary>
           <ol class="help-steps">
             <li><b>Model to teach</b> — a name for your student model. Skills it masters are saved under this name (reusable later).</li>
             <li><b>Domain</b> — what it should become expert in (e.g. "reinforcement learning"). The <b>Dean</b> (the API teacher) turns this into an ordered <b>curriculum</b> of subjects.</li>
@@ -228,16 +230,16 @@ pip install -e .</code></pre>
             </select></label>
         </div>
         <div class="run-buttons">
-          <button id="autoStartBtn" class="primary">▶ Enrol &amp; teach</button>
-          <button id="autoStopBtn" class="ghost" disabled>■ Stop</button>
-          <button id="autoForceBtn" class="ghost danger" title="Clear a stuck or old run (e.g. left over from a previous session) so you can start fresh">⟳ Force-reset</button>
+          <button id="autoStartBtn" class="primary"><svg class="ic"><use href="#i-play"></use></svg> Enrol &amp; teach</button>
+          <button id="autoStopBtn" class="ghost" disabled><svg class="ic"><use href="#i-stop"></use></svg> Stop</button>
+          <button id="autoForceBtn" class="ghost danger" title="Clear a stuck or old run (e.g. left over from a previous session) so you can start fresh"><svg class="ic"><use href="#i-refresh"></use></svg> Force-reset</button>
         </div>
         <div id="autoStatus" class="status"></div>
         <div id="autoNow" class="auto-now" hidden></div>
 
         <div id="campusWrap" class="campus-wrap">
           <div class="campus-head">🏫 Campus <span class="muted tiny-note">— step inside each building to watch the Student 🤖 and Teacher 🧑‍🏫 work</span>
-            <button id="thesisLibBtn" class="tiny" title="Browse every graduation thesis written by your agents, with their specs">📚 Thesis Library</button></div>
+            <button id="thesisLibBtn" class="tiny" title="Browse every graduation thesis written by your agents, with their specs"><svg class="ic"><use href="#i-book"></use></svg> Thesis Library</button></div>
           <div id="campusTabs" class="campus-tabs"></div>
           <canvas id="campus" width="800" height="340"></canvas>
           <div id="cohortBoard" class="cohort-board" hidden></div>
@@ -269,7 +271,7 @@ pip install -e .</code></pre>
         <canvas id="autoCurve" width="600" height="120" hidden></canvas>
 
         <div class="uni-test">
-          <h3>🧪 Test this model</h3>
+          <h3><svg class="ic"><use href="#i-flask"></use></svg> Test this model</h3>
           <p class="muted tiny-note">Now testing: <b id="uniActive">— (train or load a model)</b>
             <button id="uniActivateBtn" class="tiny">Load selected model for testing</button>
             <span id="uniActiveNote"></span></p>
@@ -278,7 +280,7 @@ pip install -e .</code></pre>
             <button id="uniAskBtn" class="primary">Ask</button>
           </div>
           <label class="lib-check" title="Retrieve the most relevant coursework from this model's enabled skills and hand it to the model as notes — weights hold competence, the library holds the facts.">
-            <input type="checkbox" id="uniLib"> 📚 Use library card (retrieve from its coursework)</label>
+            <input type="checkbox" id="uniLib"> <svg class="ic"><use href="#i-book"></use></svg> Use library card (retrieve from its coursework)</label>
           <div id="uniLibUsed" class="muted tiny-note"></div>
           <div class="answers">
             <div class="answer-col"><div class="answer-head">Base model (untaught)</div><div id="uniAnsBase" class="answer-body muted">—</div></div>
@@ -307,8 +309,8 @@ pip install -e .</code></pre>
       </label>
 
       <div class="run-buttons">
-        <button id="raceBtn" class="primary">▶ Race selected</button>
-        <button id="stopBtn" class="ghost" disabled>■ Stop</button>
+        <button id="raceBtn" class="primary"><svg class="ic"><use href="#i-play"></use></svg> Race selected</button>
+        <button id="stopBtn" class="ghost" disabled><svg class="ic"><use href="#i-stop"></use></svg> Stop</button>
       </div>
 
       <div id="status" class="status"></div>
@@ -339,7 +341,7 @@ pip install -e .</code></pre>
         <div id="hyperBox" class="hyper-box"><!-- sliders for the selected agent --></div>
 
         <div class="run-buttons">
-          <button id="gameTrainBtn" class="primary">▶ Train on GPU</button>
+          <button id="gameTrainBtn" class="primary"><svg class="ic"><use href="#i-bolt"></use></svg> Train on GPU</button>
         </div>
 
         <div id="gameStatus" class="status"></div>
@@ -348,7 +350,7 @@ pip install -e .</code></pre>
 
         <div id="saveBar" class="save-bar" hidden>
           <input id="modelName" placeholder="name this model" />
-          <button id="saveModelBtn" class="action">💾 Save</button>
+          <button id="saveModelBtn" class="action"><svg class="ic"><use href="#i-save"></use></svg> Save</button>
         </div>
 
         <div class="saved-wrap">
@@ -364,7 +366,7 @@ pip install -e .</code></pre>
 
         <div class="llm-step">
           <div class="llm-step-head">0 · Model</div>
-          <button id="llmLoadBtn" class="action">⬇ Load Qwen on GPU</button>
+          <button id="llmLoadBtn" class="action"><svg class="ic"><use href="#i-download"></use></svg> Load Qwen on GPU</button>
           <span id="llmModelStatus" class="muted tiny-note"></span>
         </div>
 
@@ -383,22 +385,22 @@ pip install -e .</code></pre>
 
         <div class="llm-step">
           <div class="llm-step-head">1 · SFT — distill knowledge</div>
-          <button id="genSftBtn" class="action">🧑‍🏫 Teacher: write data</button>
-          <button id="trainSftBtn" class="action">🏋️ Train SFT</button>
+          <button id="genSftBtn" class="action"><svg class="ic"><use href="#i-teach"></use></svg> Teacher: write data</button>
+          <button id="trainSftBtn" class="action"><svg class="ic"><use href="#i-bolt"></use></svg> Train SFT</button>
           <span id="sftStatus" class="muted tiny-note">seed dataset is built-in — you can train SFT with no key</span>
         </div>
 
         <div class="llm-step">
           <div class="llm-step-head">2 · DPO — the RL step</div>
-          <button id="genPrefsBtn" class="action">⚖️ Teacher: judge pairs</button>
-          <button id="trainDpoBtn" class="action">🏋️ Train DPO</button>
+          <button id="genPrefsBtn" class="action"><svg class="ic"><use href="#i-scale"></use></svg> Teacher: judge pairs</button>
+          <button id="trainDpoBtn" class="action"><svg class="ic"><use href="#i-bolt"></use></svg> Train DPO</button>
           <span id="dpoStatus" class="muted tiny-note">needs preference pairs (teacher key)</span>
         </div>
 
         <div class="llm-step">
           <div class="llm-step-head">3 · Evaluate — base vs tuned</div>
-          <button id="evalBtn" class="action">📊 Intrinsic (no key)</button>
-          <button id="evalJudgeBtn" class="action">⚖️ Full + judge</button>
+          <button id="evalBtn" class="action"><svg class="ic"><use href="#i-flask"></use></svg> Intrinsic (no key)</button>
+          <button id="evalJudgeBtn" class="action"><svg class="ic"><use href="#i-scale"></use></svg> Full + judge</button>
           <span id="evalStatus" class="muted tiny-note">held-out set: perplexity + ROUGE-L; add win-rate &amp; rubric with a key</span>
         </div>
 
@@ -409,7 +411,7 @@ pip install -e .</code></pre>
       <!-- ---- Reasoning Lab controls: palette + run trace ---- -->
       <div id="reasonControls" hidden>
         <details class="reason-help" open>
-          <summary>📖 How to build a graph</summary>
+          <summary><svg class="ic"><use href="#i-book"></use></svg> How to build a graph</summary>
           <ol class="help-steps">
             <li>Click a <b>behaviour</b> below to drop an agent node on the canvas.</li>
             <li>Drag from a node's <b>right dot</b> (output) to another's <b>left dot</b> (input) to connect them.</li>
@@ -421,7 +423,7 @@ pip install -e .</code></pre>
         </details>
 
         <details class="reason-help">
-          <summary>🎨 Legend</summary>
+          <summary>Legend</summary>
           <ul class="legend-list">
             <li><span class="lg-dot io"></span><b>Question / Answer</b> — graph start &amp; end</li>
             <li><span class="lg-dot gen"></span><b>Generator / Refiner</b> — write &amp; improve answers</li>
@@ -444,18 +446,18 @@ pip install -e .</code></pre>
         <h2>Model & skills <span class="muted tiny-note">(click a model to see what it learned)</span></h2>
         <div class="skill-models">
           <select id="uniModelSel"></select>
-          <button id="uniRefreshBtn" class="tiny" title="Refresh the model list">↻</button>
+          <button id="uniRefreshBtn" class="tiny" title="Refresh the model list" aria-label="Refresh the model list"><svg class="ic"><use href="#i-refresh"></use></svg></button>
         </div>
         <div class="skill-actions">
-          <button id="uniRecordBtn" class="tiny" title="See the full timeline of lessons, coursework and exam answers for this model">📜 Learning record</button>
-          <button id="uniTeachMoreBtn" class="tiny" title="Load this model into the enrol form so the Dean can teach it a NEW topic (its existing skills are kept)">📚 Teach new topic</button>
-          <button id="uniDeleteBtn" class="tiny danger" title="Permanently delete this saved model and everything it learned">🗑 Delete</button>
+          <button id="uniRecordBtn" class="tiny" title="See the full timeline of lessons, coursework and exam answers for this model"><svg class="ic"><use href="#i-scroll"></use></svg> Learning record</button>
+          <button id="uniTeachMoreBtn" class="tiny" title="Load this model into the enrol form so the Dean can teach it a NEW topic (its existing skills are kept)"><svg class="ic"><use href="#i-book"></use></svg> Teach new topic</button>
+          <button id="uniDeleteBtn" class="tiny danger" title="Permanently delete this saved model and everything it learned"><svg class="ic"><use href="#i-trash"></use></svg> Delete</button>
         </div>
         <div id="uniSkills" class="uni-skills"><span class="muted tiny-note">Skills appear here once a model has been taught. Toggle a skill on/off or retrain it — the model is rebuilt from its enabled skills.</span></div>
         <div id="uniRebuild" class="muted tiny-note"></div>
 
         <h2 style="margin-top:16px">Transcript</h2>
-        <p class="muted"><button id="autoDownloadBtn" class="tiny">⬇ Download transcript</button></p>
+        <p class="muted"><button id="autoDownloadBtn" class="tiny"><svg class="ic"><use href="#i-download"></use></svg> Download transcript</button></p>
         <div id="autoLog" class="auto-log"><span class="muted tiny-note">Enrol a model to see the Dean design a curriculum and teach each subject.</span></div>
         <div id="autoSummary" class="auto-summary" hidden></div>
       </div><!-- /autoControls -->
@@ -512,14 +514,14 @@ pip install -e .</code></pre>
   <!-- code viewer modal -->
   <div id="codeModal" class="modal" hidden>
     <div class="modal-box">
-      <div class="modal-head"><b id="codeTitle"></b><button id="codeClose" class="action">✕ close</button></div>
+      <div class="modal-head"><b id="codeTitle"></b><button id="codeClose" class="action"><svg class="ic"><use href="#i-close"></use></svg> close</button></div>
       <pre class="code-pre"><code id="codeContent"></code></pre>
     </div>
   </div>
 
   <div id="recordModal" class="modal" hidden>
     <div class="modal-box modal-box-wide">
-      <div class="modal-head"><b id="recordTitle">Learning record</b><button id="recordClose" class="action">✕ close</button></div>
+      <div class="modal-head"><b id="recordTitle">Learning record</b><button id="recordClose" class="action"><svg class="ic"><use href="#i-close"></use></svg> close</button></div>
       <p class="muted tiny-note">A timeline of every lesson this model took — the coursework it studied and how it answered each exam question. Click a lesson to expand.</p>
       <div id="recordBody" class="record-body"></div>
     </div>
@@ -527,7 +529,7 @@ pip install -e .</code></pre>
 
   <div id="thesisModal" class="modal" hidden>
     <div class="modal-box modal-box-wide">
-      <div class="modal-head"><b id="thesisTitle">📚 Graduation Thesis Library</b><button id="thesisClose" class="action">✕ close</button></div>
+      <div class="modal-head"><b id="thesisTitle">Graduation Thesis Library</b><button id="thesisClose" class="action"><svg class="ic"><use href="#i-close"></use></svg> close</button></div>
       <p class="muted tiny-note">Every thesis written by an agent before graduation — traceable to the exact model that wrote it, with its papers &amp; coursework.</p>
       <div id="thesisBody" class="record-body"></div>
     </div>
@@ -536,6 +538,7 @@ pip install -e .</code></pre>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/drawflow@0.0.59/dist/drawflow.min.js"></script>
   <script src="config.js"></script>
+  <script src="tracks.js"></script>
   <script src="connect.js"></script>
   <script src="app.js"></script>
   <script src="shell.js"></script>

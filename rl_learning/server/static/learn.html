@@ -3,27 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Learn — RL Playground</title>
-  <meta name="description" content="Deep, readable tutorials on the algorithms behind the RL Playground: pathfinding (BFS, Dijkstra, A*), reinforcement learning (Q-learning, DQN, PPO), and agentic LLMs (SFT, DPO, reasoning loops)." />
+  <title>Learn — SafeZone AI Learn</title>
+  <meta name="description" content="Deep, readable tutorials on the algorithms behind the playground: pathfinding (BFS, Dijkstra, A*), reinforcement learning (Q-learning, DQN, PPO), and agentic LLMs (SFT, DPO, reasoning loops)." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235b8cff' d='M12 2 22 12 12 22 2 12z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet" />
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="page">
+  <script src="icons.js"></script>
+
   <div class="topbar">
     <a class="brand" href="/">
       <span class="brand-mark">◆</span>
-      <span class="brand-name">RL Playground</span>
+      <span class="brand-name">SafeZone AI Learn</span>
     </a>
     <nav class="topnav">
       <a href="/">Home</a>
       <a href="/learn" class="active">Learn</a>
       <a href="/play">Playground</a>
     </nav>
+    <div class="topbar-tools">
+      <button class="theme-toggle ghost" data-theme-toggle aria-label="Switch between light and dark theme" title="Switch theme">
+        <svg class="ic tt-sun"><use href="#i-sun"></use></svg>
+        <svg class="ic tt-moon"><use href="#i-moon"></use></svg>
+      </button>
+    </div>
   </div>
 
   <div class="learn-shell">
-    <!-- Chapter rail mirrors the ladder. -->
+    <!-- Chapter rail mirrors the playground's lesson rail. -->
     <nav class="learn-toc" aria-label="Chapters">
-      <div class="toc-act">Search</div>
+      <div class="toc-act">RL Track · Search</div>
       <a href="#pathfinding">1 · Pathfinding</a>
       <a href="#streets" class="toc-sub">— on real streets</a>
       <div class="toc-act">Reinforcement Learning</div>
