@@ -9,17 +9,19 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <h1>Reinforcement Learning Playground</h1>
-    <p class="stage">Pathfinding → real-street routing → learning agents. Design a world, then race the algorithms or train an agent on it.</p>
-
+  <div class="topbar">
+    <div class="brand">
+      <span class="brand-mark">◆</span>
+      <span class="brand-name">RL Playground</span>
+      <span class="brand-tag">pathfinding → RL → agentic LLMs</span>
+    </div>
     <!-- Which machine is doing the work. Hidden entirely when the Python server
          is serving this page, because then the answer is "this one". -->
     <div id="workerBar" hidden>
       <span id="workerStatus" class="worker-pill worker-off">Checking for a GPU worker…</span>
       <button id="workerConnectBtn" class="worker-btn">Connect my GPU</button>
     </div>
-  </header>
+  </div>
 
   <!-- Pairing dialog: how the browser is bound to the user's own machine. -->
   <div id="pairOverlay" hidden>
@@ -66,6 +68,16 @@ pip install -e .</code></pre>
       </p>
     </div>
   </div>
+
+  <div class="app-shell">
+    <!-- The learning ladder — filled by shell.js. This is the primary nav:
+         a guided path you can also free-jump. -->
+    <nav class="ladder" id="ladder" aria-label="Learning ladder"></nav>
+
+    <div class="app-content">
+      <!-- Consistent per-rung header (number · title · what/why · GPU chip),
+           rendered by shell.js on every rung change. -->
+      <div id="rungHeader" class="rung-header"></div>
 
   <main>
     <!-- ============ Left: the shared editable world ============ -->
@@ -488,6 +500,8 @@ pip install -e .</code></pre>
       </div>
     </div>
   </section>
+    </div><!-- /.app-content -->
+  </div><!-- /.app-shell -->
 
   <!-- code viewer modal -->
   <div id="codeModal" class="modal" hidden>
@@ -518,5 +532,6 @@ pip install -e .</code></pre>
   <script src="config.js"></script>
   <script src="connect.js"></script>
   <script src="app.js"></script>
+  <script src="shell.js"></script>
 </body>
 </html>
