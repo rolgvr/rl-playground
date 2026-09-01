@@ -27,3 +27,8 @@ models/llm_data/
 # learn-site (site/) build artifacts
 node_modules/
 .astro/
+
+# terraform working files (state lives in the S3 backend, never here)
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/.build/
