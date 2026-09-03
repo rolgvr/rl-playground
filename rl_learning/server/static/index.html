@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SafeZone AI Learn — watch algorithms work, from pathfinding to agentic LLMs</title>
-  <meta name="description" content="A hands-on learning platform for the AI stack. Start with the Reinforcement Learning track — pathfinding (BFS, A*), deep RL (DQN, PPO), agentic LLMs (SFT, DPO, reasoning loops) — read the theory, then watch it run on your own GPU. ML, LLM engineering and DevOps tracks are on the way." />
+  <meta name="description" content="A hands-on learning platform for the full AI stack — 94 interactive lessons across nine tracks: mathematical foundations, machine learning, deep learning, reinforcement learning, LLM engineering, forecasting and DevOps. Read the theory, watch it run, then train on your own GPU." />
   <meta property="og:title" content="SafeZone AI Learn" />
   <meta property="og:description" content="Learn the AI stack by watching it work. Theory plus a live playground that runs on your own machine." />
   <meta property="og:type" content="website" />
@@ -32,6 +32,7 @@
       <a href="/" class="active">Home</a>
       <a href="/learn">Learn</a>
       <a href="/play">Playground</a>
+      <a href="/login">Sign in</a>
     </nav>
     <div class="topbar-tools">
       <button class="theme-toggle ghost" data-theme-toggle aria-label="Switch between light and dark theme" title="Switch theme">
@@ -60,37 +61,59 @@
     <!-- Track catalog -->
     <section class="track-catalog">
       <h2 class="section-h">Pick a track</h2>
-      <p class="section-sub">One platform, growing toward the full ML · AI · DevOps stack. The first track is live.</p>
+      <p class="section-sub">The full ML · AI · DevOps stack is live — 94 interactive lessons across eight tracks, every module ending in a graded self-check.</p>
 
       <div class="tracks">
-        <a class="track-card" href="/learn">
+        <a class="track-card" href="/learn#foundations">
+          <span class="track-ic"><svg class="ic ic-lg"><use href="#i-scale"></use></svg></span>
+          <h3>Mathematical Foundations</h3>
+          <p>Optimization, linear algebra, probability and information theory — the mathematics under every model, told as one story from Gauss to Shannon.</p>
+          <span class="track-meta"><span>26 lessons · live</span><span class="go">Start →</span></span>
+        </a>
+        <a class="track-card" href="/learn#toolkit">
+          <span class="track-ic"><svg class="ic ic-lg"><use href="#i-plug"></use></svg></span>
+          <h3>Practitioner's Toolkit</h3>
+          <p>Environments, GPUs and CUDA, vectorization and reproducibility — the professional workbench that makes everything else possible.</p>
+          <span class="track-meta"><span>5 lessons · live</span><span class="go">Start →</span></span>
+        </a>
+        <a class="track-card" href="/learn#ml">
+          <span class="track-ic"><svg class="ic ic-lg"><use href="#i-flask"></use></svg></span>
+          <h3>Machine Learning</h3>
+          <p>Regression to gradient boosting, clustering to recommenders — watch models fit, overfit and generalise on data you can poke.</p>
+          <span class="track-meta"><span>15 lessons · live</span><span class="go">Start →</span></span>
+        </a>
+        <a class="track-card" href="/learn#forecasting">
+          <span class="track-ic"><svg class="ic ic-lg"><use href="#i-route"></use></svg></span>
+          <h3>Forecasting</h3>
+          <p>Decomposition to Kalman filters to global neural forecasters — time series with the backtesting rigor most tutorials skip.</p>
+          <span class="track-meta"><span>7 lessons · live</span><span class="go">Start →</span></span>
+        </a>
+        <a class="track-card" href="/learn#dl">
+          <span class="track-ic"><svg class="ic ic-lg"><use href="#i-grid"></use></svg></span>
+          <h3>Deep Learning</h3>
+          <p>Backpropagation by hand up to transformers and diffusion — watch signals propagate, gradients vanish and attention route.</p>
+          <span class="track-meta"><span>9 lessons · live</span><span class="go">Start →</span></span>
+        </a>
+        <a class="track-card" href="/learn#rl">
           <span class="track-ic"><svg class="ic ic-lg"><use href="#i-cap"></use></svg></span>
           <h3>Reinforcement Learning</h3>
-          <p>Search → RL → agentic LLMs: six lessons that each reuse the one below, from a maze you draw to a Dean that teaches a model to mastery.</p>
-          <span class="track-meta"><span>6 lessons · live</span><span class="go">Start →</span></span>
+          <p>Search → RL → agentic LLMs: from a maze you draw, through deep RL on your own GPU, to AI agents and their reliability.</p>
+          <span class="track-meta"><span>8 lessons · live</span><span class="go">Start →</span></span>
         </a>
-        <div class="track-card soon">
-          <span class="badge-soon">in development</span>
-          <span class="track-ic"><svg class="ic ic-lg"><use href="#i-flask"></use></svg></span>
-          <h3>ML Fundamentals</h3>
-          <p>Regression to gradient boosting — watch models fit, overfit and generalise on data you can poke.</p>
-          <span class="track-meta"><span>coming</span></span>
-        </div>
-        <div class="track-card soon">
-          <span class="badge-soon">in development</span>
+        <a class="track-card" href="/learn#llm">
           <span class="track-ic"><svg class="ic ic-lg"><use href="#i-chip"></use></svg></span>
           <h3>LLM Engineering</h3>
-          <p>Tokenisers, attention, RAG and evals — the stack behind every AI product, opened up live.</p>
-          <span class="track-meta"><span>coming</span></span>
-        </div>
-        <div class="track-card soon">
-          <span class="badge-soon">in development</span>
+          <p>Tokenisers, attention, scaling laws, RAG and evals — the stack behind every AI product, opened up live in the page.</p>
+          <span class="track-meta"><span>10 lessons · live</span><span class="go">Start →</span></span>
+        </a>
+        <a class="track-card" href="/learn#devops">
           <span class="track-ic"><svg class="ic ic-lg"><use href="#i-server"></use></svg></span>
-          <h3>DevOps</h3>
+          <h3>DevOps &amp; Cloud</h3>
           <p>Containers, CI/CD, infrastructure as code and cloud deployment (AWS · Azure · GCP) — ship what you build, the way this platform ships itself.</p>
-          <span class="track-meta"><span>coming</span></span>
-        </div>
+          <span class="track-meta"><span>13 lessons · live</span><span class="go">Start →</span></span>
+        </a>
       </div>
+      <p class="section-sub" style="margin-top:18px">New here? Begin with the orientation story — <a href="/learn/why-data-science">How data science ate the world →</a></p>
     </section>
 
     <!-- The three parts -->
