@@ -29,6 +29,8 @@
       <a href="/">Home</a>
       <a href="/learn">Learn</a>
       <a href="/play" class="active">Playground</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/login" class="acct" data-account>Sign in</a>
     </nav>
     <div class="topbar-tools">
       <!-- Which machine is doing the work. Hidden entirely when the Python server
@@ -546,5 +548,21 @@ pip install -e .</code></pre>
   <script src="connect.js"></script>
   <script src="app.js"></script>
   <script src="shell.js"></script>
+  <script>
+    // Account chip — static-page mirror of paintChip() in the site's auth.js
+    // (this page is outside the Astro bundle, so it reads the session itself).
+    (function () {
+      try {
+        var s = JSON.parse(localStorage.getItem("szl-auth"));
+        var chip = document.querySelector("[data-account]");
+        if (chip && s && s.email) {
+          chip.textContent = s.email;
+          chip.href = "/account";
+          chip.title = "Your account";
+          chip.classList.add("signed-in");
+        }
+      } catch (e) { /* signed out — the static "Sign in" stands */ }
+    })();
+  </script>
 </body>
 </html>

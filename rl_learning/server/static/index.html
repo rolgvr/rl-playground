@@ -33,7 +33,7 @@
       <a href="/learn">Learn</a>
       <a href="/play">Playground</a>
       <a href="/pricing">Pricing</a>
-      <a href="/login">Sign in</a>
+      <a href="/login" class="acct" data-account>Sign in</a>
     </nav>
     <div class="topbar-tools">
       <button class="theme-toggle ghost" data-theme-toggle aria-label="Switch between light and dark theme" title="Switch theme">
@@ -211,5 +211,22 @@
     <span>SafeZone AI Learn — an open, hands-on learning platform for the AI stack.</span>
     <span><a href="https://github.com/rolgvr/rl-playground" target="_blank" rel="noopener"><svg class="ic"><use href="#i-github"></use></svg> Source</a></span>
   </footer>
+
+  <script>
+    // Account chip — static-page mirror of paintChip() in the site's auth.js
+    // (this page is outside the Astro bundle, so it reads the session itself).
+    (function () {
+      try {
+        var s = JSON.parse(localStorage.getItem("szl-auth"));
+        var chip = document.querySelector("[data-account]");
+        if (chip && s && s.email) {
+          chip.textContent = s.email;
+          chip.href = "/account";
+          chip.title = "Your account";
+          chip.classList.add("signed-in");
+        }
+      } catch (e) { /* signed out — the static "Sign in" stands */ }
+    })();
+  </script>
 </body>
 </html>

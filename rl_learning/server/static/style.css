@@ -1069,6 +1069,13 @@ input[type="checkbox"], input[type="range"] { accent-color: var(--accent); }
 .topnav a:hover { color: var(--ink); background: var(--panel-2); }
 .topnav a.active { color: var(--ink); background: var(--active-bg); }
 
+/* Account chip — same treatment as the Learn pages (learn.css). */
+.topnav a.acct { border: 1px solid var(--border); border-radius: 999px;
+  padding: 5px 13px; }
+.topnav a.acct.signed-in { font-family: var(--font-mono); font-size: var(--fs-xs);
+  color: var(--accent); border-color: var(--accent);
+  max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* Static content pages scroll normally (the playground is the app grid). */
 body.page { display: block; }
 .page-main { max-width: 1060px; margin: 0 auto; padding: 24px 24px 40px; }
