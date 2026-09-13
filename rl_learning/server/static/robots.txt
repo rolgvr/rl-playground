@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /login
+Disallow: /signup
+Disallow: /solutions/
+
+Sitemap: https://rl.safezoneaitech.com/sitemap.xml
