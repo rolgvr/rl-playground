@@ -75,3 +75,20 @@
     });
   });
 })();
+
+/* Mobile navigation: [data-nav-toggle] opens the topbar menu; the curriculum
+ * toggle does the same for the lesson sidebar. Delegated so it works on every
+ * page (static and built alike) with zero per-page wiring. */
+(function () {
+  "use strict";
+  document.addEventListener("click", function (e) {
+    var nav = e.target.closest("[data-nav-toggle]");
+    if (nav) { nav.closest(".topbar").classList.toggle("nav-open"); return; }
+    var cur = e.target.closest("[data-curriculum-toggle]");
+    if (cur) { cur.closest(".lesson-shell").classList.toggle("nav-open"); return; }
+    if (!e.target.closest(".topbar")) {
+      var open = document.querySelector(".topbar.nav-open");
+      if (open) open.classList.remove("nav-open");
+    }
+  });
+})();
