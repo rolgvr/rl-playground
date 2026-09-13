@@ -1149,6 +1149,30 @@ a.track-card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .closing h2 { margin: 0 0 8px; font-size: var(--fs-3xl); }
 .closing p { color: var(--muted); margin: 0 0 18px; }
 
+/* Newsletter sign-up: sits under the closing CTA on the home and Learn pages. */
+.nl { margin: 26px auto 0; padding-top: 22px; border-top: 1px solid var(--border); max-width: 520px; }
+.nl-copy { color: var(--muted); font-size: var(--fs-md); margin: 0 0 12px; }
+.nl-form { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 0; }
+.nl-form input { flex: 1 1 220px; min-width: 0; box-sizing: border-box; background: var(--cell);
+  border: 1px solid var(--border); border-radius: 10px; color: var(--ink);
+  font: 500 16px var(--font-body); padding: 10px 12px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.nl-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.nl-form .btn { white-space: nowrap; }
+.nl-form.busy { opacity: 0.6; pointer-events: none; }
+.nl-done { color: var(--good); font-weight: 600; margin: 0; }
+.nl-done .ic { vertical-align: -3px; }
+
+/* One-line status toast: "You're subscribed" after the confirm-link hop. */
+.szl-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(12px);
+  z-index: 60; max-width: min(92vw, 420px); padding: 11px 16px; border-radius: 12px;
+  background: var(--panel); border: 1px solid var(--border); color: var(--ink);
+  font-size: var(--fs-base); font-weight: 600; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; }
+.szl-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.szl-toast.good { border-color: var(--good-soft-border); color: var(--good); }
+.szl-toast.warn { border-color: var(--danger-soft-border); color: var(--danger); }
+
 .page-foot { max-width: 1060px; margin: 0 auto; padding: 20px 24px 40px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: var(--fs-sm); }
 .page-foot a { color: var(--muted); }
 

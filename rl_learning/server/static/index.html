@@ -209,13 +209,77 @@
         <a href="/learn/rl/pathfinding" class="btn btn-primary">Read: Pathfinding →</a>
         <a href="/play" class="btn btn-ghost">Jump into the playground</a>
       </div>
+
+      <!-- Newsletter (double opt-in; see terraform/newsletter.tf) -->
+      <div class="nl" data-newsletter>
+        <p class="nl-copy">New lessons and videos, about twice a month. No spam, unsubscribe in one click.</p>
+        <form class="nl-form" data-nl-form data-source="home" novalidate>
+          <label class="sr-only" for="nl-email">Email address</label>
+          <input id="nl-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email" inputmode="email" />
+          <button type="submit" class="btn btn-primary">Get new lessons</button>
+        </form>
+      </div>
     </section>
   </main>
 
   <footer class="page-foot">
     <span>SafeZone AI Learn — an open, hands-on learning platform for the AI stack.</span>
-    <span><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="https://github.com/rolgvr/rl-playground" target="_blank" rel="noopener"><svg class="ic"><use href="#i-github"></use></svg> Source</a></span>
+    <span><a href="/changelog">What's new</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="https://github.com/rolgvr/rl-playground" target="_blank" rel="noopener"><svg class="ic"><use href="#i-github"></use></svg> Source</a></span>
   </footer>
+
+  <script>
+    // Newsletter — static-page mirror of the site's newsletter.js (this page
+    // is outside the Astro bundle). Posts to the same API the accounts use;
+    // the API origin comes from /auth-config.json, written at deploy time.
+    (function () {
+      var FORM_SEL = "[data-nl-form]";
+      function toast(text, kind) {
+        var t = document.createElement("div");
+        t.className = "szl-toast " + (kind || "");
+        t.setAttribute("role", "status");
+        t.textContent = text;
+        document.body.appendChild(t);
+        requestAnimationFrame(function () { t.classList.add("show"); });
+        setTimeout(function () { t.classList.remove("show"); setTimeout(function () { t.remove(); }, 300); }, 5000);
+      }
+      // After the confirm / unsubscribe hop the API sends people back here.
+      try {
+        var q = new URLSearchParams(location.search);
+        if (q.has("subscribed")) toast(q.get("subscribed") === "1" ? "You're subscribed ✓" : "That confirmation link isn't valid any more.", q.get("subscribed") === "1" ? "good" : "warn");
+        else if (q.has("unsubscribed")) toast(q.get("unsubscribed") === "1" ? "You're unsubscribed." : "That unsubscribe link isn't valid.", q.get("unsubscribed") === "1" ? "" : "warn");
+        if (q.has("subscribed") || q.has("unsubscribed")) history.replaceState(null, "", location.pathname);
+      } catch (e) { /* no URL API — nothing to announce */ }
+
+      var form = document.querySelector(FORM_SEL);
+      if (!form) return;
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var input = form.querySelector("input[type=email]");
+        var email = (input.value || "").trim();
+        if (!email || !input.checkValidity()) { input.focus(); input.reportValidity && input.reportValidity(); return; }
+        form.classList.add("busy");
+        fetch("/auth-config.json").then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; })
+          .then(function (cfg) {
+            if (!cfg || !cfg.apiUrl) throw new Error("no api");
+            return fetch(cfg.apiUrl + "/newsletter/subscribe", {
+              method: "POST", headers: { "content-type": "application/json" },
+              body: JSON.stringify({ email: email, source: form.getAttribute("data-source") || "home" }),
+            });
+          })
+          .then(function (r) {
+            if (!r || !r.ok) throw new Error("bad status");
+            var done = document.createElement("p");
+            done.className = "nl-done";
+            done.innerHTML = '<svg class="ic"><use href="#i-check"></use></svg> Check your inbox to confirm.';
+            form.replaceWith(done);
+          })
+          .catch(function () {
+            form.classList.remove("busy");
+            toast("Couldn't sign you up just now — try again in a minute.", "warn");
+          });
+      });
+    })();
+  </script>
 
   <script>
     // Account chip — static-page mirror of paintChip() in the site's auth.js
